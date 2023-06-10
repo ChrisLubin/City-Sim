@@ -251,6 +251,14 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
         }
     }
 
+    public async void HostOrJoinGame()
+    {
+        QueryResponse response = await LobbyService.Instance.QueryLobbiesAsync();
+        List<Lobby> lobbies = response.Results;
+
+        ChangeState(lobbies.Count == 0 ? MultiplayerState.CreatingLobby : MultiplayerState.JoiningLobby);
+    }
+
     public void StartHost()
     {
         NetworkManager.Singleton.StartHost();
