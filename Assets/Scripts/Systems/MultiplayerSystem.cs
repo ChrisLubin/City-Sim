@@ -12,7 +12,6 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using static Unity.Services.Lobbies.Models.DataObject;
 
 public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSystem>
@@ -30,10 +29,10 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
 
     private const string _LOBBY_RELAY_CODE_KEY = "RELAY_CODE";
     private const string _LOBBY_PLAYER_NAME_KEY = "PLAYER_NAME";
-    private LobbyEventCallbacks lobbyEventCallbacks;
+    private LobbyEventCallbacks _lobbyEventCallbacks;
     private Lobby _lobby;
 
-    public string HostUnityId { get; private set; }
+    private string _hostUnityId;
     public NetworkList<PlayerData> PlayerData { get; private set; }
     private const float _LOBBY_HEARTBEAT_INTERVAL = 15f;
     private float _timeSinceLastLobbyHeartbeat = 0f;
@@ -45,12 +44,6 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
         MultiplayerSystem.LocalPlayerName = $"Player-{UnityEngine.Random.Range(1, 10)}{UnityEngine.Random.Range(1, 10)}{UnityEngine.Random.Range(1, 10)}";
     }
 
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-        if (!this.IsHost) { return; }
-    }
-
     public async override void OnDestroy()
     {
         base.OnDestroy();
@@ -60,18 +53,16 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
             NetworkManager.Singleton.Shutdown();
         }
         await this.DisposeLobby();
-
-        if (!this.IsHost) { return; }
     }
 
     private async Task DisposeLobby()
     {
-        if (this.lobbyEventCallbacks != null)
+        if (this._lobbyEventCallbacks != null)
         {
-            this.lobbyEventCallbacks.PlayerJoined -= this.OnPlayerJoinedLobby;
-            this.lobbyEventCallbacks.PlayerLeft -= this.OnPlayerLeftLobby;
+            this._lobbyEventCallbacks.PlayerJoined -= this.OnPlayerJoinedLobby;
+            this._lobbyEventCallbacks.PlayerLeft -= this.OnPlayerLeftLobby;
         }
-        this.lobbyEventCallbacks = null;
+        this._lobbyEventCallbacks = null;
 
         if (this._lobby != null)
         {
@@ -105,19 +96,6 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
     {
         NetworkManager.Singleton.Shutdown();
         MultiplayerSystem.Instance.ChangeState(MultiplayerState.Connected);
-    }
-
-    // Referenced in main menu buttons
-    public void ChangeState(string newStateString)
-    {
-        if (!Enum.IsDefined(typeof(MultiplayerState), newStateString))
-        {
-            this._logger.Log("Invalid state given", Logger.LogLevel.Error);
-            return;
-        }
-
-        MultiplayerState newStateEnum = Enum.Parse<MultiplayerState>(newStateString);
-        this.ChangeState(newStateEnum);
     }
 
     public async void ChangeState(MultiplayerState newState)
@@ -164,7 +142,6 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
 
                     CreateLobbyOptions createLobbyOptions = new()
                     {
-                        IsPrivate = true,
                         Data = new() { { _LOBBY_RELAY_CODE_KEY, new DataObject(VisibilityOptions.Member, relayCode) } },
                         Player = new(null, null, null, createAllocation.AllocationId.ToString())
                         {
@@ -172,13 +149,13 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
                         },
                     };
                     this._lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, _MAX_PLAYER_COUNT, createLobbyOptions);
-                    this.HostUnityId = this._lobby.HostId;
-                    this._logger.Log($"Created private lobby {lobbyName} as {MultiplayerSystem.LocalPlayerName}");
+                    this._hostUnityId = this._lobby.HostId;
+                    this._logger.Log($"Created public lobby {lobbyName} as {MultiplayerSystem.LocalPlayerName}");
 
-                    this.lobbyEventCallbacks = new LobbyEventCallbacks();
-                    this.lobbyEventCallbacks.PlayerJoined += this.OnPlayerJoinedLobby;
-                    this.lobbyEventCallbacks.PlayerLeft += this.OnPlayerLeftLobby;
-                    await LobbyService.Instance.SubscribeToLobbyEventsAsync(this._lobby.Id, this.lobbyEventCallbacks);
+                    this._lobbyEventCallbacks = new LobbyEventCallbacks();
+                    this._lobbyEventCallbacks.PlayerJoined += this.OnPlayerJoinedLobby;
+                    this._lobbyEventCallbacks.PlayerLeft += this.OnPlayerLeftLobby;
+                    await LobbyService.Instance.SubscribeToLobbyEventsAsync(this._lobby.Id, this._lobbyEventCallbacks);
                     this._logger.Log($"Subscribed to lobby events");
                     this.ChangeState(MultiplayerState.CreatedLobby);
                 }
@@ -214,7 +191,7 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
                         Player = new() { Data = new() { { _LOBBY_PLAYER_NAME_KEY, new(PlayerDataObject.VisibilityOptions.Member, MultiplayerSystem.LocalPlayerName) } } },
                     };
                     this._lobby = await LobbyService.Instance.QuickJoinLobbyAsync(joinLobbyOptions);
-                    this.HostUnityId = this._lobby.HostId;
+                    this._hostUnityId = this._lobby.HostId;
                     this._logger.Log($"Joined lobby {this._lobby.Name} as {MultiplayerSystem.LocalPlayerName}");
 
                     if (!this._lobby.Data.TryGetValue(_LOBBY_RELAY_CODE_KEY, out DataObject joinedLobbyRelayCodeData))
@@ -235,9 +212,9 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
                     await LobbyService.Instance.UpdatePlayerAsync(this._lobby.Id, AuthenticationService.Instance.PlayerId, updatePlayerOptions);
                     this._logger.Log($"Linked Relay allocation ID to player");
 
-                    this.lobbyEventCallbacks = new LobbyEventCallbacks();
-                    this.lobbyEventCallbacks.PlayerLeft += this.OnPlayerLeftLobby;
-                    await LobbyService.Instance.SubscribeToLobbyEventsAsync(this._lobby.Id, this.lobbyEventCallbacks);
+                    this._lobbyEventCallbacks = new LobbyEventCallbacks();
+                    this._lobbyEventCallbacks.PlayerLeft += this.OnPlayerLeftLobby;
+                    await LobbyService.Instance.SubscribeToLobbyEventsAsync(this._lobby.Id, this._lobbyEventCallbacks);
                     this._logger.Log($"Subscribed to lobby events");
                     this.ChangeState(MultiplayerState.JoinedLobby);
                 }
@@ -311,15 +288,6 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
         return "";
     }
 
-    public async Task SetLobbyPrivacy(bool isPrivate)
-    {
-        if (!this.IsHost || this._lobby == null) { return; }
-
-        UpdateLobbyOptions updateLobbyOptions = new() { IsPrivate = isPrivate };
-        await LobbyService.Instance.UpdateLobbyAsync(this._lobby.Id, updateLobbyOptions);
-        this._logger.Log($"Set lobby to {(isPrivate ? "private" : "public")}");
-    }
-
     private void OnPlayerJoinedLobby(List<LobbyPlayerJoined> joinedPlayers)
     {
         if (!this.IsHost) { return; }
@@ -383,7 +351,7 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
                 if (!leftPlayersIndex.Contains(playerData.LobbyPlayerIndex)) { continue; }
                 MultiplayerSystem.OnPlayerDisconnect?.Invoke(playerData);
 
-                if (playerData.UnityId != this.HostUnityId) { continue; }
+                if (playerData.UnityId != this._hostUnityId) { continue; }
                 didHostLeave = true;
                 break;
             }
@@ -403,7 +371,7 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
             if (playerData.ClientId != clientId) { continue; }
             MultiplayerSystem.OnPlayerDisconnect?.Invoke(playerData);
 
-            if (playerData.UnityId != this.HostUnityId) { continue; }
+            if (playerData.UnityId != this._hostUnityId) { continue; }
             didHostLeave = true;
             break;
         }
@@ -411,29 +379,6 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
         if (this.IsHost || !didHostLeave) { return; }
         this._logger.Log("The host has disconnected from the Relay service");
         MultiplayerSystem.OnHostDisconnect?.Invoke();
-    }
-
-    private void OnPlayerGameSceneLoaded(string joinedPlayerUnityId, string joinedPlayerUsername, ulong joinedPlayerClientId)
-    {
-        if (!this.IsHost) { return; }
-        bool didFindPlayer = false;
-
-        for (int i = 0; i < this.PlayerData.Count; i++)
-        {
-            PlayerData playerData = this.PlayerData[i];
-            if (playerData.UnityId != joinedPlayerUnityId) { continue; }
-
-            didFindPlayer = true;
-            playerData.ClientId = joinedPlayerClientId;
-            playerData.Username = joinedPlayerUsername;
-            this.PlayerData[i] = playerData;
-            break;
-        }
-
-        if (!didFindPlayer)
-        {
-            this._logger.Log($"Coudn't find the player {joinedPlayerUsername} in the PlayerData list!", Logger.LogLevel.Error);
-        }
     }
 }
 
