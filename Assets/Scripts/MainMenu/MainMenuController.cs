@@ -11,6 +11,7 @@ public class MainMenuController : MonoBehaviour
 
     private void Awake()
     {
+        GameManager.OnStateChange += this.OnGameStateChange;
         MultiplayerSystem.OnStateChange += this.OnMultiplayerStateChange;
         this._playerNameInput.onValueChanged.AddListener(this.OnPlayerNameInputValueChange);
         this._startGameButton.onClick.AddListener(this.OnStartButtonClick);
@@ -19,6 +20,7 @@ public class MainMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
+        GameManager.OnStateChange -= this.OnGameStateChange;
         MultiplayerSystem.OnStateChange -= this.OnMultiplayerStateChange;
         this._playerNameInput.onValueChanged.RemoveAllListeners();
         this._startGameButton.onClick.RemoveAllListeners();
@@ -47,6 +49,16 @@ public class MainMenuController : MonoBehaviour
         this._loadingText.gameObject.SetActive(true);
         this._loadingText.text = "Processing...";
         MultiplayerSystem.Instance.HostOrJoinGame();
+    }
+
+    private void OnGameStateChange(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.GameStarted:
+                this.HideAllGameObjects();
+                break;
+        }
     }
 
     private void OnMultiplayerStateChange(MultiplayerState state)
