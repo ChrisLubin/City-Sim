@@ -1790,6 +1790,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9edfedee91f2c394382b039b16b985d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camera: {fileID: 8211209269559267855}
   _rotateSpeed: 30
 --- !u!1 &1491129765998800
 GameObject:
@@ -3006,7 +3007,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4214324233180529641}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}

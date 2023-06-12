@@ -42,11 +42,21 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
         base.Awake();
         this.PlayerData = new();
         MultiplayerSystem.LocalPlayerName = $"Player-{UnityEngine.Random.Range(1, 10)}{UnityEngine.Random.Range(1, 10)}{UnityEngine.Random.Range(1, 10)}";
+        RpcSystem.OnClientConnectRpc += this.OnClientConnectRpc;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (this.IsHost) { return; }
+
+        RpcSystem.Instance.ClientConnectServerRpc(AuthenticationService.Instance.PlayerId, MultiplayerSystem.LocalPlayerName);
     }
 
     public async override void OnDestroy()
     {
         base.OnDestroy();
+        RpcSystem.OnClientConnectRpc -= this.OnClientConnectRpc;
         if (NetworkManager.Singleton)
         {
             NetworkManager.Singleton.OnClientDisconnectCallback -= this.OnClientRelayDisconnect;
@@ -367,6 +377,29 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
             if (!didHostLeave) { return; }
             this._logger.Log("The host has disconnected from the lobby");
             MultiplayerSystem.OnHostDisconnect?.Invoke();
+        }
+    }
+
+    private void OnClientConnectRpc(string joinedPlayerUnityId, string joinedPlayerUsername, ulong joinedPlayerClientId)
+    {
+        if (!this.IsHost) { return; }
+        bool didFindPlayer = false;
+
+        for (int i = 0; i < this.PlayerData.Count; i++)
+        {
+            PlayerData playerData = this.PlayerData[i];
+            if (playerData.UnityId != joinedPlayerUnityId) { continue; }
+
+            didFindPlayer = true;
+            playerData.ClientId = joinedPlayerClientId;
+            playerData.Username = joinedPlayerUsername;
+            this.PlayerData[i] = playerData;
+            break;
+        }
+
+        if (!didFindPlayer)
+        {
+            this._logger.Log($"Coudn't find the player {joinedPlayerUsername} in the PlayerData list!", Logger.LogLevel.Error);
         }
     }
 

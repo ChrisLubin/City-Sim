@@ -11,7 +11,7 @@ public class MainMenuController : MonoBehaviour
 
     private void Awake()
     {
-        GameManager.OnStateChange += this.OnGameStateChange;
+        PlayerManager.OnLocalPlayerSpawn += this.HideAllGameObjects;
         MultiplayerSystem.OnStateChange += this.OnMultiplayerStateChange;
         this._playerNameInput.onValueChanged.AddListener(this.OnPlayerNameInputValueChange);
         this._startGameButton.onClick.AddListener(this.OnStartButtonClick);
@@ -20,7 +20,7 @@ public class MainMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameManager.OnStateChange -= this.OnGameStateChange;
+        PlayerManager.OnLocalPlayerSpawn -= this.HideAllGameObjects;
         MultiplayerSystem.OnStateChange -= this.OnMultiplayerStateChange;
         this._playerNameInput.onValueChanged.RemoveAllListeners();
         this._startGameButton.onClick.RemoveAllListeners();
@@ -51,16 +51,6 @@ public class MainMenuController : MonoBehaviour
         MultiplayerSystem.Instance.HostOrJoinGame();
     }
 
-    private void OnGameStateChange(GameState state)
-    {
-        switch (state)
-        {
-            case GameState.GameStarted:
-                this.HideAllGameObjects();
-                break;
-        }
-    }
-
     private void OnMultiplayerStateChange(MultiplayerState state)
     {
         switch (state)
@@ -74,12 +64,6 @@ public class MainMenuController : MonoBehaviour
                 break;
             case MultiplayerState.JoiningLobby:
                 this._loadingText.text = "Joining game...";
-                break;
-            case MultiplayerState.CreatedLobby:
-                this.HideAllGameObjects();
-                break;
-            case MultiplayerState.JoinedLobby:
-                this.HideAllGameObjects();
                 break;
         }
     }

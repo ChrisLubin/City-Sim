@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -8,18 +9,35 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
     [SerializeField] Transform _playerSpawnArea;
     [SerializeField] float _playerSpawnMaxDistance = 9f;
 
-    private IDictionary<ulong, PlayerController> _playersMap = new Dictionary<ulong, PlayerController>();
+    private ulong _localClientId;
+
+    private IDictionary<ulong, PlayerController> _alivePlayersMap = new Dictionary<ulong, PlayerController>();
+
+    public static event Action OnLocalPlayerSpawn;
 
     protected override void Awake()
     {
         base.Awake();
         GameManager.OnStateChange += this.OnGameStateChange;
+        PlayerController.OnSpawn += this.OnSpawn;
+        MultiplayerSystem.Instance.PlayerData.OnListChanged += this.OnPlayerDataChanged;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        this._localClientId = NetworkManager.Singleton.LocalClientId;
     }
 
     public override void OnDestroy()
     {
-        base.Awake();
+        base.OnDestroy();
         GameManager.OnStateChange -= this.OnGameStateChange;
+        PlayerController.OnSpawn -= this.OnSpawn;
+        if (MultiplayerSystem.Instance != null)
+        {
+            MultiplayerSystem.Instance.PlayerData.OnListChanged -= this.OnPlayerDataChanged;
+        }
     }
 
     private void OnGameStateChange(GameState state)
@@ -33,10 +51,36 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
         }
     }
 
+    private void OnSpawn(ulong clientId, PlayerController player)
+    {
+        this._alivePlayersMap[clientId] = player;
+        if (clientId == this._localClientId)
+        {
+            PlayerManager.OnLocalPlayerSpawn?.Invoke();
+        }
+    }
+
+    private void OnPlayerDataChanged(NetworkListEvent<PlayerData> _)
+    {
+        if (GameManager.State != GameState.GameStarted) { return; }
+        if (!this.IsHost)
+        {
+            this._logger.Log($"Player Data list changed. Total players: {MultiplayerSystem.Instance.PlayerData.Count}");
+            return;
+        }
+
+        foreach (PlayerData playerData in MultiplayerSystem.Instance.PlayerData)
+        {
+            if (playerData.ClientId == PlayerData.UNREGISTERED_CLIENT_ID || this._alivePlayersMap.ContainsKey(playerData.ClientId)) { continue; }
+
+            this.SpawnPlayer(playerData.ClientId);
+        }
+    }
+
     private void SpawnPlayer(ulong clientId)
     {
         if (!this.IsHost) { return; }
-        if (this._playersMap.ContainsKey(clientId))
+        if (this._alivePlayersMap.ContainsKey(clientId))
         {
             this._logger.Log($"This player is still alive. Cannot spawn them again.", Logger.LogLevel.Error);
             return;

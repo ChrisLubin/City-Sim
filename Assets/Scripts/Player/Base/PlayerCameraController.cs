@@ -2,11 +2,14 @@ using UnityEngine;
 
 public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraController>
 {
+    [SerializeField] private Camera _camera;
+
     private Vector2 _rotate;
     [SerializeField] private float _rotateSpeed = 30f;
 
     protected override void OnOwnerNetworkSpawn()
     {
+        this._camera.enabled = true;
         Cursor.lockState = CursorLockMode.Locked;
 
         // Ensure starting rotation is correct
