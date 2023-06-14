@@ -22,6 +22,7 @@ public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraCon
         this._rotate.x += Input.GetAxis("Mouse X") * this._rotateSpeed * Time.deltaTime;
         this._rotate.y += Input.GetAxis("Mouse Y") * this._rotateSpeed * Time.deltaTime;
 
-        transform.localRotation = Quaternion.Euler(-this._rotate.y, this._rotate.x, 0);
+        transform.localRotation = Quaternion.Euler(0, this._rotate.x, 0);
+        this._camera.gameObject.transform.localRotation = Quaternion.Euler(-this._rotate.y, 0, 0);
     }
 }
