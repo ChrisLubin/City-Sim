@@ -10,6 +10,7 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
     [SerializeField] float _playerSpawnMaxDistance = 9f;
 
     private ulong _localClientId;
+    public static PlayerController LocalPlayer { get; private set; }
 
     private IDictionary<ulong, PlayerController> _alivePlayersMap = new Dictionary<ulong, PlayerController>();
 
@@ -56,6 +57,7 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
         this._alivePlayersMap[clientId] = player;
         if (clientId == this._localClientId)
         {
+            PlayerManager.LocalPlayer = player;
             PlayerManager.OnLocalPlayerSpawn?.Invoke();
         }
     }

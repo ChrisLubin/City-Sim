@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovementController>
 {
+    private PlayerInteractorController _playerInteractorController;
+
     [Header("Movement")]
     private float _moveSpeed;
     [SerializeField] private float _walkSpeed = 3f;
@@ -36,8 +38,8 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
 
     [SerializeField] private Transform _orientation;
 
-    float _horizontalInput;
-    float _verticalInput;
+    private float _horizontalInput;
+    private float _verticalInput;
 
     Vector3 _moveDirection;
 
@@ -45,12 +47,26 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
 
     [SerializeField] private MovementState _state;
 
+    private void Awake()
+    {
+        this._playerInteractorController = GetComponent<PlayerInteractorController>();
+        this._playerInteractorController.OnPlayerEnterVehicle += this.OnPlayerEnterVehicle;
+        this._playerInteractorController.OnPlayerExitVehicle += this.OnPlayerExitVehicle;
+    }
+
     private void Start()
     {
         this._rigidBody = GetComponent<Rigidbody>();
         this._rigidBody.freezeRotation = true;
         this._canJump = true;
         this._startYScale = transform.localScale.y;
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        this._playerInteractorController.OnPlayerEnterVehicle -= this.OnPlayerEnterVehicle;
+        this._playerInteractorController.OnPlayerExitVehicle -= this.OnPlayerExitVehicle;
     }
 
     private void Update()
@@ -206,4 +222,7 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
         Crouching,
         Air
     }
+
+    private void OnPlayerEnterVehicle() => this.enabled = false;
+    private void OnPlayerExitVehicle() => this.enabled = true;
 }
