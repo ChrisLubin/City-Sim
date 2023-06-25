@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovementController>
 {
     private PlayerInteractorController _playerInteractorController;
+    private BoxCollider _collider;
 
     [Header("Movement")]
     private float _moveSpeed;
@@ -49,14 +50,14 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
 
     private void Awake()
     {
+        this._rigidBody = GetComponent<Rigidbody>();
+        this._collider = GetComponent<BoxCollider>();
         this._playerInteractorController = GetComponent<PlayerInteractorController>();
-        this._playerInteractorController.OnPlayerEnterVehicle += this.OnPlayerEnterVehicle;
-        this._playerInteractorController.OnPlayerExitVehicle += this.OnPlayerExitVehicle;
+        this._playerInteractorController.OnDidInteraction += this.OnPlayerDidInteraction;
     }
 
     private void Start()
     {
-        this._rigidBody = GetComponent<Rigidbody>();
         this._rigidBody.freezeRotation = true;
         this._canJump = true;
         this._startYScale = transform.localScale.y;
@@ -65,8 +66,7 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
     public override void OnDestroy()
     {
         base.OnDestroy();
-        this._playerInteractorController.OnPlayerEnterVehicle -= this.OnPlayerEnterVehicle;
-        this._playerInteractorController.OnPlayerExitVehicle -= this.OnPlayerExitVehicle;
+        this._playerInteractorController.OnDidInteraction -= this.OnPlayerDidInteraction;
     }
 
     private void Update()
@@ -223,6 +223,22 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
         Air
     }
 
-    private void OnPlayerEnterVehicle() => this.enabled = false;
-    private void OnPlayerExitVehicle() => this.enabled = true;
+    private void OnPlayerDidInteraction(InteractionType interaction)
+    {
+        switch (interaction)
+        {
+            case InteractionType.EnterVehicle:
+                this.enabled = false;
+                this._rigidBody.useGravity = false;
+                this._collider.enabled = false;
+                break;
+            case InteractionType.ExitVehicle:
+                this.enabled = true;
+                this._rigidBody.useGravity = true;
+                this._collider.enabled = true;
+                break;
+            default:
+                break;
+        }
+    }
 }

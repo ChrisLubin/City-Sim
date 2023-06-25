@@ -29,7 +29,7 @@ public class VehicleInteractionController : MonoBehaviour, IInteractable
             this._playerInDriverSeat = null;
             player.transform.parent = null;
             this.DriverSeatPlayerChanged?.Invoke(null);
-            player.PlayerHasExitedVehicle();
+            player.DidInteraction(InteractionType.ExitVehicle);
         }
     }
 
@@ -42,7 +42,7 @@ public class VehicleInteractionController : MonoBehaviour, IInteractable
         player.transform.parent = this._driverSeatPosition;
         this._playerInDriverSeat = player;
         this.DriverSeatPlayerChanged?.Invoke(player);
-        player.PlayerHasEnteredVehicle();
+        player.DidInteraction(InteractionType.EnterVehicle);
     }
 
     private void OnLocalPlayerSpawn() => this._localPlayer = PlayerManager.LocalPlayer.GetComponent<PlayerInteractorController>();

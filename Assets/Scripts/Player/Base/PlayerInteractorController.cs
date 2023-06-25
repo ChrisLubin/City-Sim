@@ -4,17 +4,8 @@ using UnityEngine;
 public class PlayerInteractorController : NetworkBehaviorAutoDisable<PlayerInteractorController>
 {
     [SerializeField] private Camera _camera;
-    private Rigidbody _rigidBody;
-    private BoxCollider _collider;
 
-    public event Action OnPlayerEnterVehicle;
-    public event Action OnPlayerExitVehicle;
-
-    private void Awake()
-    {
-        this._rigidBody = GetComponent<Rigidbody>();
-        this._collider = GetComponent<BoxCollider>();
-    }
+    public event Action<InteractionType> OnDidInteraction;
 
     private void Update()
     {
@@ -35,16 +26,11 @@ public class PlayerInteractorController : NetworkBehaviorAutoDisable<PlayerInter
         }
     }
 
-    public void PlayerHasEnteredVehicle()
-    {
-        this._rigidBody.useGravity = false;
-        this._collider.enabled = false;
-        this.OnPlayerEnterVehicle?.Invoke();
-    }
-    public void PlayerHasExitedVehicle()
-    {
-        this._rigidBody.useGravity = true;
-        this._collider.enabled = true;
-        this.OnPlayerExitVehicle?.Invoke();
-    }
+    public void DidInteraction(InteractionType interaction) => this.OnDidInteraction?.Invoke(interaction);
+}
+
+public enum InteractionType
+{
+    EnterVehicle,
+    ExitVehicle,
 }

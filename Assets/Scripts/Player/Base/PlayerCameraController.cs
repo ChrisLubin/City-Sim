@@ -14,15 +14,13 @@ public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraCon
     private void Awake()
     {
         this._playerInteractorController = GetComponent<PlayerInteractorController>();
-        this._playerInteractorController.OnPlayerEnterVehicle += this.OnPlayerEnterVehicle;
-        this._playerInteractorController.OnPlayerExitVehicle += this.OnPlayerExitVehicle;
+        this._playerInteractorController.OnDidInteraction += this.OnPlayerDidInteraction;
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
-        this._playerInteractorController.OnPlayerEnterVehicle -= this.OnPlayerEnterVehicle;
-        this._playerInteractorController.OnPlayerExitVehicle -= this.OnPlayerExitVehicle;
+        this._playerInteractorController.OnDidInteraction -= this.OnPlayerDidInteraction;
     }
 
     protected override void OnOwnerNetworkSpawn()
@@ -53,10 +51,19 @@ public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraCon
         }
     }
 
-    private void OnPlayerEnterVehicle() => this._shouldRotatePlayer = false;
-    private void OnPlayerExitVehicle()
+    private void OnPlayerDidInteraction(InteractionType interaction)
     {
-        this._rotate.x = transform.localEulerAngles.y < 180 ? transform.localEulerAngles.y : transform.localEulerAngles.y - 360;
-        this._shouldRotatePlayer = true;
+        switch (interaction)
+        {
+            case InteractionType.EnterVehicle:
+                this._shouldRotatePlayer = false;
+                break;
+            case InteractionType.ExitVehicle:
+                this._rotate.x = transform.localEulerAngles.y < 180 ? transform.localEulerAngles.y : transform.localEulerAngles.y - 360;
+                this._shouldRotatePlayer = true;
+                break;
+            default:
+                break;
+        }
     }
 }
