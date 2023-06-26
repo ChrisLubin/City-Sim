@@ -33,4 +33,5 @@ public enum InteractionType
 {
     EnterVehicle,
     ExitVehicle,
+    PurchaseFromClerk,
 }
