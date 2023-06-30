@@ -9,7 +9,6 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
     [SerializeField] Transform _playerSpawnArea;
     [SerializeField] float _playerSpawnMaxDistance = 9f;
 
-    private ulong _localClientId;
     public static PlayerController LocalPlayer { get; private set; }
 
     private IDictionary<ulong, PlayerController> _alivePlayersMap = new Dictionary<ulong, PlayerController>();
@@ -22,12 +21,6 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
         GameManager.OnStateChange += this.OnGameStateChange;
         PlayerController.OnSpawn += this.OnSpawn;
         MultiplayerSystem.Instance.PlayerData.OnListChanged += this.OnPlayerDataChanged;
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-        this._localClientId = NetworkManager.Singleton.LocalClientId;
     }
 
     public override void OnDestroy()
@@ -55,7 +48,7 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
     private void OnSpawn(ulong clientId, PlayerController player)
     {
         this._alivePlayersMap[clientId] = player;
-        if (clientId == this._localClientId)
+        if (clientId == MultiplayerSystem.LocalClientId)
         {
             PlayerManager.LocalPlayer = player;
             PlayerManager.OnLocalPlayerSpawn?.Invoke();
@@ -93,4 +86,6 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
         playerTransform.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
         this._logger.Log($"Spawned player for {MultiplayerSystem.Instance.GetPlayerUsername(clientId)}");
     }
+
+    public bool TryGetPlayer(ulong clientId, out PlayerController player) => this._alivePlayersMap.TryGetValue(clientId, out player);
 }

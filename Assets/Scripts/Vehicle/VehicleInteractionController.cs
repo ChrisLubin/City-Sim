@@ -1,49 +1,36 @@
 using System;
 using UnityEngine;
 
-public class VehicleInteractionController : MonoBehaviour, IInteractable
+public class VehicleInteractionController : NetworkBehaviourWithLogger<VehicleInteractionController>, IInteractable
 {
-    [SerializeField] private Transform _driverSeatPosition;
-    private PlayerInteractorController _playerInDriverSeat;
-    private PlayerInteractorController _localPlayer;
+    private VehicleSeatController _seatController;
 
-    public event Action<PlayerInteractorController> DriverSeatPlayerChanged;
+    public event Action<InteractionType> OnInteraction;
 
-    private void Awake()
+    protected override void Awake()
     {
-        PlayerManager.OnLocalPlayerSpawn += this.OnLocalPlayerSpawn;
-    }
-
-    private void OnDestroy()
-    {
-        PlayerManager.OnLocalPlayerSpawn -= this.OnLocalPlayerSpawn;
+        base.Awake();
+        this._seatController = GetComponent<VehicleSeatController>();
     }
 
     private void Update()
     {
-        if (this._playerInDriverSeat == null || this._playerInDriverSeat != this._localPlayer) { return; }
+        if (!this.IsOwner || !this._seatController.HasPlayerInDriverSeat) { return; }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            PlayerInteractorController player = this._playerInDriverSeat;
-            this._playerInDriverSeat = null;
-            player.transform.parent = null;
-            this.DriverSeatPlayerChanged?.Invoke(null);
-            player.DidInteraction(InteractionType.ExitVehicle);
+            this._logger.Log("Local player is exiting vehicle");
+            this.OnInteraction?.Invoke(InteractionType.ExitVehicle);
+            PlayerManager.LocalPlayer.GetComponent<PlayerInteractorController>().DidInteraction(InteractionType.ExitVehicle);
         }
     }
 
     public void DoInteract(PlayerInteractorController player)
     {
-        if (this._playerInDriverSeat != null) { return; }
+        if (!this.IsOwner || this._seatController.HasPlayerInDriverSeat) { return; }
 
-        player.transform.position = this._driverSeatPosition.position;
-        player.transform.forward = this._driverSeatPosition.forward;
-        player.transform.parent = this._driverSeatPosition;
-        this._playerInDriverSeat = player;
-        this.DriverSeatPlayerChanged?.Invoke(player);
+        this._logger.Log("Local player is entering vehicle");
+        this.OnInteraction?.Invoke(InteractionType.EnterVehicle);
         player.DidInteraction(InteractionType.EnterVehicle);
     }
-
-    private void OnLocalPlayerSpawn() => this._localPlayer = PlayerManager.LocalPlayer.GetComponent<PlayerInteractorController>();
 }

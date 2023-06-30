@@ -26,6 +26,7 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
     public static MultiplayerState State { get; private set; }
     private const int _MAX_PLAYER_COUNT = 7;
     public static string LocalPlayerName { get; private set; }
+    public static ulong LocalClientId { get => NetworkManager.Singleton.LocalClientId; }
 
     private const string _LOBBY_RELAY_CODE_KEY = "RELAY_CODE";
     private const string _LOBBY_PLAYER_NAME_KEY = "PLAYER_NAME";

@@ -1,30 +1,21 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class VehicleMovementController : MonoBehaviour
+public class VehicleMovementController : NetworkBehaviour
 {
-    private VehicleInteractionController _interactionController;
-    private PlayerInteractorController _playerInDriverSeat;
-    private PlayerInteractorController _localPlayer;
+    private VehicleSeatController _seatController;
 
     [SerializeField] private float _forwardSpeed = 10f;
     [SerializeField] private float _rotateSpeed = 60f;
 
     private void Awake()
     {
-        PlayerManager.OnLocalPlayerSpawn += this.OnLocalPlayerSpawn;
-        this._interactionController = GetComponent<VehicleInteractionController>();
-        this._interactionController.DriverSeatPlayerChanged += this.OnDriverSeatPlayerChanged;
-    }
-
-    private void OnDestroy()
-    {
-        PlayerManager.OnLocalPlayerSpawn -= this.OnLocalPlayerSpawn;
-        this._interactionController.DriverSeatPlayerChanged -= this.OnDriverSeatPlayerChanged;
+        this._seatController = GetComponent<VehicleSeatController>();
     }
 
     private void Update()
     {
-        if (this._playerInDriverSeat == null || this._playerInDriverSeat != this._localPlayer) { return; }
+        if (!this.IsOwner || !this._seatController.HasPlayerInDriverSeat) { return; }
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -44,7 +35,4 @@ public class VehicleMovementController : MonoBehaviour
             transform.Rotate(Vector3.up * this._rotateSpeed * Time.deltaTime);
         }
     }
-
-    private void OnDriverSeatPlayerChanged(PlayerInteractorController player) => this._playerInDriverSeat = player;
-    private void OnLocalPlayerSpawn() => this._localPlayer = PlayerManager.LocalPlayer.GetComponent<PlayerInteractorController>();
 }

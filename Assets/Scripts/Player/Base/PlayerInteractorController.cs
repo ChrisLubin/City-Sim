@@ -7,13 +7,15 @@ public class PlayerInteractorController : NetworkBehaviorAutoDisable<PlayerInter
 
     public event Action<InteractionType> OnDidInteraction;
 
+    [SerializeField] private float _maxInteractDistance = 2f;
+
     private void Update()
     {
         if (!this.IsOwner) { return; }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Vector3 maxInteractDistancePoint = this._camera.transform.position + this._camera.transform.forward * 2f;
+            Vector3 maxInteractDistancePoint = this._camera.transform.position + this._camera.transform.forward * this._maxInteractDistance;
 
             Debug.DrawLine(this._camera.transform.position, maxInteractDistancePoint, Color.black, 10f);
             bool didFindInteractable = Physics.Linecast(this._camera.transform.position, maxInteractDistancePoint, out RaycastHit hit, LayerMask.GetMask(Constants.LayerNames.Interactable));

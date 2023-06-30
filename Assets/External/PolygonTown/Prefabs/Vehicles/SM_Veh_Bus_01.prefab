@@ -511,10 +511,13 @@ GameObject:
   m_Component:
   - component: {fileID: 4539974619004416}
   - component: {fileID: 33332463602786908}
+  - component: {fileID: 2380427202866510860}
+  - component: {fileID: 6122008771371285533}
   - component: {fileID: 23958318780703202}
   - component: {fileID: 5921816490378961264}
   - component: {fileID: 3963735799210951888}
   - component: {fileID: 7350351503390309353}
+  - component: {fileID: 5650521937341071985}
   m_Layer: 7
   m_Name: SM_Veh_Bus_01
   m_TagString: Untagged
@@ -556,6 +559,48 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1276464829909656}
   m_Mesh: {fileID: 4300000, guid: 0dee10a9bb00860458325043d78a0f80, type: 3}
+--- !u!114 &2380427202866510860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276464829909656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 1
+  AutoObjectParentSync: 1
+--- !u!114 &6122008771371285533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276464829909656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36d220fde120bb9489e74ed75cb76270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncPositionX: 1
+  SyncPositionY: 0
+  SyncPositionZ: 1
+  SyncRotAngleX: 0
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 0
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  InLocalSpace: 0
+  Interpolate: 1
 --- !u!23 &23958318780703202
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -623,7 +668,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fee21072528a0f46aba306b4f535a24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _driverSeatPosition: {fileID: 8917642225355120224}
 --- !u!114 &7350351503390309353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -638,6 +682,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _forwardSpeed: 8
   _rotateSpeed: 50
+--- !u!114 &5650521937341071985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276464829909656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74775ffe06648c14eb58f59f377d4f02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _driverSeatPosition: {fileID: 8917642225355120224}
 --- !u!1 &1422013066050804
 GameObject:
   m_ObjectHideFlags: 0
@@ -1312,7 +1369,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8917642225355120224}
-  - component: {fileID: 187448057131606008}
+  - component: {fileID: 8725808790023781464}
   m_Layer: 7
   m_Name: DriverSeat
   m_TagString: Untagged
@@ -1335,7 +1392,7 @@ Transform:
   m_Father: {fileID: 4539974619004416}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &187448057131606008
+--- !u!114 &8725808790023781464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
