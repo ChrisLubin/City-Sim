@@ -432,6 +432,7 @@ GameObject:
   - component: {fileID: 4406575881905867310}
   - component: {fileID: 8424501865363331719}
   - component: {fileID: 6562857419900748140}
+  - component: {fileID: 4770470050596037425}
   m_Layer: 7
   m_Name: SM_Veh_Convertable_01
   m_TagString: Untagged
@@ -606,6 +607,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _driverSeatPosition: {fileID: 6661512061014245343}
+--- !u!114 &4770470050596037425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847148240549790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1c4d4a155b081449251cce225c53cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxPlayerDistanceCheck: 8
 --- !u!1 &1925197282100688
 GameObject:
   m_ObjectHideFlags: 0

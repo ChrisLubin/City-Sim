@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 1846904541921908506}
   - component: {fileID: 890286927519636560}
   - component: {fileID: 2542616568278188974}
+  - component: {fileID: 1657692645501655205}
   m_Layer: 7
   m_Name: SM_Veh_Truck_Delivery_01
   m_TagString: Untagged
@@ -195,6 +196,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _driverSeatPosition: {fileID: 9175226368046861431}
+--- !u!114 &1657692645501655205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1027750582790248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1c4d4a155b081449251cce225c53cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxPlayerDistanceCheck: 11
 --- !u!1 &1081753108232072
 GameObject:
   m_ObjectHideFlags: 0

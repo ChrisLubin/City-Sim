@@ -515,6 +515,7 @@ GameObject:
   - component: {fileID: 7426379571110174809}
   - component: {fileID: 2462326011026151120}
   - component: {fileID: 8288702462175937418}
+  - component: {fileID: 330831232367513036}
   m_Layer: 7
   m_Name: SM_Veh_Pickup_01
   m_TagString: Untagged
@@ -689,6 +690,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _driverSeatPosition: {fileID: 151254245851000331}
+--- !u!114 &330831232367513036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968802732931520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1c4d4a155b081449251cce225c53cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxPlayerDistanceCheck: 8
 --- !u!1 &7150976704029879380
 GameObject:
   m_ObjectHideFlags: 0

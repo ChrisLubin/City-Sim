@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 2439115249622201125}
   - component: {fileID: 6577915695282717144}
   - component: {fileID: 8938735499263070861}
+  - component: {fileID: 5980817471847285934}
   m_Layer: 7
   m_Name: SM_Veh_Firetruck_01
   m_TagString: Untagged
@@ -277,6 +278,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _driverSeatPosition: {fileID: 5469567967718667337}
+--- !u!114 &5980817471847285934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209555985277952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1c4d4a155b081449251cce225c53cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxPlayerDistanceCheck: 13
 --- !u!1 &1271201421836116
 GameObject:
   m_ObjectHideFlags: 0

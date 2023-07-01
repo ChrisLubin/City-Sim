@@ -518,6 +518,7 @@ GameObject:
   - component: {fileID: 3963735799210951888}
   - component: {fileID: 7350351503390309353}
   - component: {fileID: 5650521937341071985}
+  - component: {fileID: 2755803449924317256}
   m_Layer: 7
   m_Name: SM_Veh_Bus_01
   m_TagString: Untagged
@@ -695,6 +696,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _driverSeatPosition: {fileID: 8917642225355120224}
+--- !u!114 &2755803449924317256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276464829909656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1c4d4a155b081449251cce225c53cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxPlayerDistanceCheck: 16
 --- !u!1 &1422013066050804
 GameObject:
   m_ObjectHideFlags: 0
