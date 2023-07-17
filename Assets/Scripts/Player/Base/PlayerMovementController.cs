@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovementController>
@@ -42,11 +43,16 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
     private float _horizontalInput;
     private float _verticalInput;
 
+    private Vector3 _previousMoveDirection;
     Vector3 _moveDirection;
+    private bool _isMoving { get => this._moveDirection != Vector3.zero; }
 
     Rigidbody _rigidBody;
 
     [SerializeField] private MovementState _state;
+    private bool _isMovingForward = false;
+    public event Action<MovementState> OnStateChange;
+    public event Action<bool> OnMovementDirectionChange;
 
     private void Awake()
     {
@@ -112,31 +118,44 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
         }
     }
 
+    private void UpdateState(MovementState newState)
+    {
+        if (this._state == newState) { return; }
+
+        this._state = newState;
+        this.OnStateChange?.Invoke(newState);
+    }
+
     private void StateHandlerUpdate()
     {
         if (Input.GetKey(this._crouchKey))
         {
-            this._state = MovementState.Crouching;
+            this.UpdateState(MovementState.Crouching);
             this._moveSpeed = this._crouchSpeed;
         }
         else if (Input.GetKey(this._sprintKey) && this._isGrounded)
         {
-            this._state = MovementState.Sprinting;
+            this.UpdateState(MovementState.Sprinting);
             this._moveSpeed = this._sprintSpeed;
         }
-        else if (this._isGrounded)
+        else if (this._isGrounded && this._isMoving)
         {
-            this._state = MovementState.Walking;
+            this.UpdateState(MovementState.Walking);
             this._moveSpeed = this._walkSpeed;
+        }
+        else if (this._isGrounded && !this._isMoving)
+        {
+            this.UpdateState(MovementState.Idle);
         }
         else
         {
-            this._state = MovementState.Air;
+            this.UpdateState(MovementState.Air);
         }
     }
 
     private void MovePlayer()
     {
+        this._previousMoveDirection = this._moveDirection;
         this._moveDirection = this._orientation.forward * this._verticalInput + this._orientation.right * this._horizontalInput;
 
         if (IsOnSlope() && !this._exitingSlope)
@@ -157,6 +176,15 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
 
         // Turn gravity off while on slope
         this._rigidBody.useGravity = !IsOnSlope();
+
+        bool isMovingForward = Input.GetKey(KeyCode.W);
+
+        if (isMovingForward != this._isMovingForward)
+        {
+            // Changed movement direction
+            this._isMovingForward = isMovingForward;
+            this.OnMovementDirectionChange?.Invoke(this._isMovingForward);
+        }
     }
 
     private void SpeedControlUpdate()
@@ -215,8 +243,9 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
         return Vector3.ProjectOnPlane(this._moveDirection, this._slopeHit.normal).normalized;
     }
 
-    private enum MovementState
+    public enum MovementState
     {
+        Idle,
         Walking,
         Sprinting,
         Crouching,
