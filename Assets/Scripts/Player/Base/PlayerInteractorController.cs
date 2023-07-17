@@ -9,6 +9,19 @@ public class PlayerInteractorController : NetworkBehaviorAutoDisable<PlayerInter
 
     [SerializeField] private float _maxInteractDistance = 2f;
 
+    protected override void OnOwnerNetworkSpawn()
+    {
+        this.OnDidInteraction += this._OnDidInteraction;
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        if (!this.IsOwner) { return; }
+
+        this.OnDidInteraction -= this._OnDidInteraction;
+    }
+
     private void Update()
     {
         if (!this.IsOwner) { return; }
@@ -25,6 +38,21 @@ public class PlayerInteractorController : NetworkBehaviorAutoDisable<PlayerInter
             if (!didFindComponent) { return; }
 
             interactable.DoInteract(this);
+        }
+    }
+
+    private void _OnDidInteraction(InteractionType interaction)
+    {
+        switch (interaction)
+        {
+            case InteractionType.EnterVehicle:
+                this.enabled = false;
+                break;
+            case InteractionType.ExitVehicle:
+                this.enabled = true;
+                break;
+            default:
+                break;
         }
     }
 
