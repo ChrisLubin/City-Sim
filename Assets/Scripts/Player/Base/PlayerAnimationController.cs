@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour
+public class PlayerAnimationController : NetworkBehaviorAutoDisable<PlayerAnimationController>
 {
     private Animator _animator;
+    private ClientNetworkAnimator _networkAnimator;
     private PlayerMovementController _movementController;
 
     private const string _IS_WALKING_PARAMETER = "isWalking";
@@ -11,16 +12,20 @@ public class PlayerAnimationController : MonoBehaviour
     private const string _DO_IDLE_PARAMETER = "doIdle";
     private const string _DO_JUMP_PARAMETER = "doJump";
 
-    private void Awake()
+    protected override void OnOwnerNetworkSpawn()
     {
         this._animator = GetComponent<Animator>();
+        this._networkAnimator = GetComponent<ClientNetworkAnimator>();
         this._movementController = GetComponent<PlayerMovementController>();
         this._movementController.OnStateChange += this.OnMovementStateChange;
         this._movementController.OnMovementDirectionChange += this.OnMovementDirectionChange;
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
+        if (!this.IsOwner) { return; }
+
         this._movementController.OnStateChange -= this.OnMovementStateChange;
         this._movementController.OnMovementDirectionChange -= this.OnMovementDirectionChange;
     }
@@ -30,7 +35,7 @@ public class PlayerAnimationController : MonoBehaviour
         switch (state)
         {
             case PlayerMovementController.MovementState.Idle:
-                this._animator.SetTrigger(_DO_IDLE_PARAMETER);
+                this._networkAnimator.SetTrigger(_DO_IDLE_PARAMETER);
                 this._animator.SetBool(_IS_WALKING_PARAMETER, false);
                 this._animator.SetBool(_IS_SPRINTING_PARAMETER, false);
                 break;
@@ -43,7 +48,7 @@ public class PlayerAnimationController : MonoBehaviour
                 this._animator.SetBool(_IS_WALKING_PARAMETER, false);
                 break;
             case PlayerMovementController.MovementState.Air:
-                this._animator.SetTrigger(_DO_JUMP_PARAMETER);
+                this._networkAnimator.SetTrigger(_DO_JUMP_PARAMETER);
                 break;
             default:
                 break;
