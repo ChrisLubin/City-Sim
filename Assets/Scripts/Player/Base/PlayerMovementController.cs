@@ -259,11 +259,15 @@ public class PlayerMovementController : NetworkBehaviorAutoDisable<PlayerMovemen
             case InteractionType.EnterVehicle:
                 this.enabled = false;
                 this._rigidBody.useGravity = false;
+                this._rigidBody.isKinematic = true;
+                this._rigidBody.interpolation = RigidbodyInterpolation.None;
                 this._collider.enabled = false;
                 break;
             case InteractionType.ExitVehicle:
                 this.enabled = true;
                 this._rigidBody.useGravity = true;
+                this._rigidBody.isKinematic = false;
+                this._rigidBody.interpolation = RigidbodyInterpolation.Interpolate;
                 this._collider.enabled = true;
                 break;
             default:

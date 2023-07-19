@@ -11,6 +11,8 @@ public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraCon
 
     private bool _shouldRotatePlayer = true;
 
+    private const float _VEHICLE_Y_POSITION_OFFSET = 0.32f;
+
     private void Awake()
     {
         this._playerInteractorController = GetComponent<PlayerInteractorController>();
@@ -57,10 +59,12 @@ public class PlayerCameraController : NetworkBehaviorAutoDisable<PlayerCameraCon
         {
             case InteractionType.EnterVehicle:
                 this._shouldRotatePlayer = false;
+                this._camera.gameObject.transform.position += Vector3.down * _VEHICLE_Y_POSITION_OFFSET;
                 break;
             case InteractionType.ExitVehicle:
                 this._rotate.x = transform.localEulerAngles.y < 180 ? transform.localEulerAngles.y : transform.localEulerAngles.y - 360;
                 this._shouldRotatePlayer = true;
+                this._camera.gameObject.transform.position += Vector3.up * _VEHICLE_Y_POSITION_OFFSET;
                 break;
             default:
                 break;
