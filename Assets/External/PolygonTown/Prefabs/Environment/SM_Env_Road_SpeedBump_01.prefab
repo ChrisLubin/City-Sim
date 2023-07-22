@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4876862007872390}
   - component: {fileID: 33562717618263094}
   - component: {fileID: 23639950866234500}
+  - component: {fileID: 3120125538492190630}
   m_Layer: 3
   m_Name: SM_Env_Road_SpeedBump_01
   m_TagString: Untagged
@@ -83,3 +84,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3120125538492190630
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480333166181468}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.524818, y: 0.12270089, z: 8.873202}
+  m_Center: {x: 0.00000061094755, y: 0.061350446, z: 0}

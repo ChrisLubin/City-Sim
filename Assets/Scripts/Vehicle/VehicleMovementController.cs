@@ -238,16 +238,22 @@ public class VehicleMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        // We call the method AnimateWheelMeshes() in order to match the wheel collider movements with the 3D meshes of the wheels.
+        AnimateWheelMeshes();
+
+        if (this.IsOwner)
+        {
+            //CAR DATA
+
+            // We determine the speed of the car.
+            carSpeed = (2 * Mathf.PI * frontLeftCollider.radius * frontLeftCollider.rpm * 60) / 1000;
+            // Save the local velocity of the car in the x axis. Used to know if the car is drifting.
+            localVelocityX = transform.InverseTransformDirection(carRigidbody.velocity).x;
+            // Save the local velocity of the car in the z axis. Used to know if the car is going forward or backwards.
+            localVelocityZ = transform.InverseTransformDirection(carRigidbody.velocity).z;
+        }
+
         if (!this.IsOwner || !this._seatController.HasPlayerInDriverSeat) { return; }
-
-        //CAR DATA
-
-        // We determine the speed of the car.
-        carSpeed = (2 * Mathf.PI * frontLeftCollider.radius * frontLeftCollider.rpm * 60) / 1000;
-        // Save the local velocity of the car in the x axis. Used to know if the car is drifting.
-        localVelocityX = transform.InverseTransformDirection(carRigidbody.velocity).x;
-        // Save the local velocity of the car in the z axis. Used to know if the car is going forward or backwards.
-        localVelocityZ = transform.InverseTransformDirection(carRigidbody.velocity).z;
 
         //CAR PHYSICS
 
@@ -263,14 +269,10 @@ public class VehicleMovementController : NetworkBehaviour
         */
         if (Input.GetKey(KeyCode.W))
         {
-            CancelInvoke("DecelerateCar");
-            deceleratingCar = false;
             GoForward();
         }
         if (Input.GetKey(KeyCode.S))
         {
-            CancelInvoke("DecelerateCar");
-            deceleratingCar = false;
             GoReverse();
         }
 
@@ -284,8 +286,6 @@ public class VehicleMovementController : NetworkBehaviour
         }
         if (Input.GetKey(KeyCode.Space))
         {
-            CancelInvoke("DecelerateCar");
-            deceleratingCar = false;
             Handbrake();
         }
         if (Input.GetKeyUp(KeyCode.Space))
@@ -305,10 +305,6 @@ public class VehicleMovementController : NetworkBehaviour
         {
             ResetSteeringAngle();
         }
-
-        // We call the method AnimateWheelMeshes() in order to match the wheel collider movements with the 3D meshes of the wheels.
-        AnimateWheelMeshes();
-
     }
 
     // This method converts the car speed data from float to string, and then set the text of the UI carSpeedText with this value.
@@ -470,6 +466,9 @@ public class VehicleMovementController : NetworkBehaviour
     // This method apply positive torque to the wheels in order to go forward.
     public void GoForward()
     {
+        CancelInvoke("DecelerateCar");
+        deceleratingCar = false;
+
         //If the forces aplied to the rigidbody in the 'x' asis are greater than
         //3f, it means that the car is losing traction, then the car will start emitting particle systems.
         if (Mathf.Abs(localVelocityX) > 2.5f)
@@ -525,6 +524,9 @@ public class VehicleMovementController : NetworkBehaviour
     // This method apply negative torque to the wheels in order to go backwards.
     public void GoReverse()
     {
+        CancelInvoke("DecelerateCar");
+        deceleratingCar = false;
+
         //If the forces aplied to the rigidbody in the 'x' asis are greater than
         //3f, it means that the car is losing traction, then the car will start emitting particle systems.
         if (Mathf.Abs(localVelocityX) > 2.5f)
@@ -646,6 +648,9 @@ public class VehicleMovementController : NetworkBehaviour
     // it is high, then you could make the car to feel like going on ice.
     public void Handbrake()
     {
+        CancelInvoke("DecelerateCar");
+        deceleratingCar = false;
+
         CancelInvoke("RecoverTraction");
         // We are going to start losing traction smoothly, there is were our 'driftingAxis' variable takes
         // place. This variable will start from 0 and will reach a top value of 1, which means that the maximum

@@ -5,15 +5,17 @@ public class VehicleSeatController : NetworkBehaviourWithLogger<VehicleSeatContr
 {
     private VehicleInteractionController _interactionController;
 
-    [SerializeField] public Transform _driverSeatPosition;
+    [SerializeField] private Transform _driverSeatPosition;
 
     private const ulong _EMPTY_DRIVER_SEAT_CLIENT_ID = ulong.MaxValue;
+    private const ulong _AI_DRIVER_SEAT_CLIENT_ID = _EMPTY_DRIVER_SEAT_CLIENT_ID - 1;
     private const float _MAX_SEAT_DESYNC_THRESHOLD = 0.1f;
 
     private NetworkVariable<ulong> _playerInDriverSeatClientId = new(_EMPTY_DRIVER_SEAT_CLIENT_ID, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     private bool _isDriverChildOfSeatObject { get => this._driverSeatPosition.transform.childCount != 0; } // Used to stop desync when host parents player to seat
 
-    public bool HasPlayerInDriverSeat { get => this._playerInDriverSeatClientId.Value != _EMPTY_DRIVER_SEAT_CLIENT_ID; }
+    public bool HasPlayerInDriverSeat { get => this._playerInDriverSeatClientId.Value != _EMPTY_DRIVER_SEAT_CLIENT_ID && this._playerInDriverSeatClientId.Value != _AI_DRIVER_SEAT_CLIENT_ID; }
+    public bool HasAiInDriverSeat { get => this._playerInDriverSeatClientId.Value == _AI_DRIVER_SEAT_CLIENT_ID; }
 
     protected override void Awake()
     {
