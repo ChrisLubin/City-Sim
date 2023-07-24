@@ -17,6 +17,11 @@ public class VehicleSeatController : NetworkBehaviourWithLogger<VehicleSeatContr
     public bool HasPlayerInDriverSeat { get => this._playerInDriverSeatClientId.Value != _EMPTY_DRIVER_SEAT_CLIENT_ID && this._playerInDriverSeatClientId.Value != _AI_DRIVER_SEAT_CLIENT_ID; }
     public bool HasAiInDriverSeat { get => this._playerInDriverSeatClientId.Value == _AI_DRIVER_SEAT_CLIENT_ID; }
 
+    public void TestAiDriver()
+    {
+        this._playerInDriverSeatClientId.Value = _AI_DRIVER_SEAT_CLIENT_ID;
+    }
+
     protected override void Awake()
     {
         base.Awake();

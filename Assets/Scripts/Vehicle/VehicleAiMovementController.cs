@@ -6,15 +6,18 @@ public class VehicleAiMovementController : NetworkBehaviour
 {
     private VehicleMovementController _movementController;
     private VehicleSeatController _seatController;
+    private VehicleAiPathController _pathController;
 
     [SerializeField] private Transform _frontOfVehicle;
-    [SerializeField] private Transform _target;
     [SerializeField] private float _maxCollisionLengthDistanceCheck = 7f;
     [SerializeField] private float _maxCollisionWidthDistanceCheck = 6f;
     [SerializeField] private float _maxCollisionHeightDistanceCheck = 1f;
     [SerializeField] private float _turnThreshold = 1f;
 
     [SerializeField] private float _maxSpeed = 3f;
+
+    private Vector3 _target = Vector3.zero;
+    private bool _hasTarget { get => this._target != Vector3.zero; }
 
     void OnDrawGizmosSelected()
     {
@@ -52,22 +55,34 @@ public class VehicleAiMovementController : NetworkBehaviour
     {
         this._movementController = GetComponent<VehicleMovementController>();
         this._seatController = GetComponent<VehicleSeatController>();
+        this._pathController = GetComponent<VehicleAiPathController>();
+        this._pathController.OnNextNodeChange += this.OnTargetChange;
     }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        this._pathController.OnNextNodeChange -= this.OnTargetChange;
+    }
+
+    private void OnTargetChange(Vector3 nextTarget) => this._target = nextTarget;
 
     void Update()
     {
-        if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || this._target == null) { return; }
+        if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
-        // Stop moving if the target is in front of us
+        float distance = Vector3.Distance(new(transform.position.x, 0, transform.position.z), new(this._target.x, 0, this._target.z));
+
+        // Stop moving if we are near the target or about to hit something
         RaycastHit[] objectsInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f);
-        if (objectsInFront.Any(obj => obj.collider.gameObject == this._target.gameObject))
+        if (distance < 3 || objectsInFront.Any(obj => obj.collider.gameObject != gameObject))
         {
             this._movementController.DecelerateCar();
             return;
         }
 
         // Handle steering
-        Vector3 directionsToTarget = this._frontOfVehicle.InverseTransformPoint(this._target.position);
+        Vector3 directionsToTarget = this._frontOfVehicle.InverseTransformPoint(this._target);
         bool isToLeft = directionsToTarget.x < 0;
         bool isBehind = directionsToTarget.z < 0;
         if (Mathf.Abs(directionsToTarget.x) >= this._turnThreshold)
@@ -82,10 +97,10 @@ public class VehicleAiMovementController : NetworkBehaviour
             this._movementController.ResetSteeringAngle();
         }
 
-        // Press gas if below max speed
+        // Maintain max speed
         if (this._movementController.carSpeed < this._maxSpeed)
-        {
             this._movementController.GoForward();
-        }
+        else
+            this._movementController.DecelerateCar();
     }
 }
