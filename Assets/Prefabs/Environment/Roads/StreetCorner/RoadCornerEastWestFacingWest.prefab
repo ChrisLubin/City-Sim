@@ -1,0 +1,165 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3973345466845386454
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 223465134673368067}
+  m_Layer: 0
+  m_Name: RoadCornerEastWestFacingWest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &223465134673368067
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3973345466845386454}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3102643846836015531}
+  - {fileID: 5045205716745614256}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!1001 &3098659497165047181
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 223465134673368067}
+    m_Modifications:
+    - target: {fileID: 1634167961940024, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_Name
+      value: SM_Env_Road_Corner_End_02 (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3456935649406576484, guid: ba544f33ef654724d8c878d4d343aa89,
+        type: 3}
+      propertyPath: m_TagString
+      value: AiVehicleNavigationAllDirections
+      objectReference: {fileID: 0}
+    - target: {fileID: 6458479794220306631, guid: ba544f33ef654724d8c878d4d343aa89,
+        type: 3}
+      propertyPath: m_TagString
+      value: AiVehicleNavigationEastDirection
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+--- !u!4 &3102643846836015531 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89,
+    type: 3}
+  m_PrefabInstance: {fileID: 3098659497165047181}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &5046920655593531286
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 223465134673368067}
+    m_Modifications:
+    - target: {fileID: 1634167961940024, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_Name
+      value: SM_Env_Road_Corner_End_02 (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3456935649406576484, guid: ba544f33ef654724d8c878d4d343aa89,
+        type: 3}
+      propertyPath: m_TagString
+      value: AiVehicleNavigationAllDirections
+      objectReference: {fileID: 0}
+    - target: {fileID: 6458479794220306631, guid: ba544f33ef654724d8c878d4d343aa89,
+        type: 3}
+      propertyPath: m_TagString
+      value: AiVehicleNavigationWestDirection
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ba544f33ef654724d8c878d4d343aa89, type: 3}
+--- !u!4 &5045205716745614256 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4055303077205030, guid: ba544f33ef654724d8c878d4d343aa89,
+    type: 3}
+  m_PrefabInstance: {fileID: 5046920655593531286}
+  m_PrefabAsset: {fileID: 0}

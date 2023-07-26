@@ -4,8 +4,11 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - AiVehicleNavigationNodeSide1
-  - AiVehicleNavigationNodeSide2
+  - AiVehicleNavigationAllDirections
+  - AiVehicleNavigationNorthDirection
+  - AiVehicleNavigationEastDirection
+  - AiVehicleNavigationSouthDirection
+  - AiVehicleNavigationWestDirection
   layers:
   - Default
   - TransparentFX
