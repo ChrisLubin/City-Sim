@@ -9,10 +9,12 @@ using UnityEngine;
 public class VehicleAiPathController : NetworkBehaviour
 {
     private VehicleSeatController _seatController;
-
     private Seeker _seeker;
-    private Path _route = null;
+
+    private Path _currentDirectionPath = null;
     private int _currentWaypoint = 0;
+    private DirectionWithTurningPoint[] _directionsWithTurningPoints;
+    private int _directionSwitchCount = 0;
     [SerializeField] private float _waypointEnteredDistance = 3;
 
     [SerializeField] private Transform _target;
@@ -34,7 +36,7 @@ public class VehicleAiPathController : NetworkBehaviour
         None
     }
 
-    private IDictionary<PathDirection, string> _directionToGraphNameMap = new Dictionary<PathDirection, string>()
+    private static IDictionary<PathDirection, string> _DIRECTION_TO_GRAPH_NAME_MAP = new Dictionary<PathDirection, string>()
     {
         { PathDirection.None, _ALL_DIRECTIONS_GRAPH_NAME },
         { PathDirection.North, _NORTH_DIRECTION_GRAPH_NAME },
@@ -43,198 +45,10 @@ public class VehicleAiPathController : NetworkBehaviour
         { PathDirection.West, _WEST_DIRECTION_GRAPH_NAME },
     };
 
-    private static IDictionary<PathDirection, Vector3[]> _DIRECTION_TO_DIRECTION_POINTS_MAP = new Dictionary<PathDirection, Vector3[]>();
-
-    private Vector3 _test;
-
-    private void Awake()
-    {
-        this._seatController = GetComponent<VehicleSeatController>();
-        this._seeker = GetComponent<Seeker>();
-        Debug.Log(transform.forward);
-    }
-
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-        this._seatController.TestAiDriver();
-    }
-
-    private static Vector3[] _ALL_DIRECTION_POINTS;
-    private static Vector3[] _NORTH_DIRECTION_POINTS;
-    private static Vector3[] _EAST_DIRECTION_POINTS;
-    private static Vector3[] _SOUTH_DIRECTION_POINTS;
-    private static Vector3[] _WEST_DIRECTION_POINTS;
-
-    private void Start()
-    {
-        if (VehicleAiPathController._ALL_DIRECTION_POINTS == null)
-        {
-            Debug.Log("INIT");
-            VehicleAiPathController._ALL_DIRECTION_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.AllDirections).Select(obj => obj.transform.position).ToArray();
-            VehicleAiPathController._NORTH_DIRECTION_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.NorthDirection).Select(obj => obj.transform.position).ToArray();
-            VehicleAiPathController._EAST_DIRECTION_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.EastDirection).Select(obj => obj.transform.position).ToArray();
-            VehicleAiPathController._SOUTH_DIRECTION_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.SouthDirection).Select(obj => obj.transform.position).ToArray();
-            VehicleAiPathController._WEST_DIRECTION_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.WestDirection).Select(obj => obj.transform.position).ToArray();
-            VehicleAiPathController._DIRECTION_TO_DIRECTION_POINTS_MAP[PathDirection.North] = VehicleAiPathController._NORTH_DIRECTION_POINTS;
-            VehicleAiPathController._DIRECTION_TO_DIRECTION_POINTS_MAP[PathDirection.East] = VehicleAiPathController._EAST_DIRECTION_POINTS;
-            VehicleAiPathController._DIRECTION_TO_DIRECTION_POINTS_MAP[PathDirection.South] = VehicleAiPathController._SOUTH_DIRECTION_POINTS;
-            VehicleAiPathController._DIRECTION_TO_DIRECTION_POINTS_MAP[PathDirection.West] = VehicleAiPathController._WEST_DIRECTION_POINTS;
-        }
-        // this.GetNextDirection();
-        this.NextTry();
-    }
-
-    private async void NextTry()
-    {
-        this._directionSwitchCount = 0;
-        this._currentWaypoint = 0;
-        await this.GetWholeRoute();
-        this._seeker.drawGizmos = true;
-        this._seeker.detailedGizmos = true;
-        List<DirectionWithTurningPoint> directionsWithTurningPoints = this.GetDirectionsWithTurningPointsForRoute();
-
-        Debug.Log("DIRECTIONS WITH TURNING POINTS");
-        foreach (var direction in directionsWithTurningPoints)
-        {
-            Debug.Log(direction.Direction);
-            Debug.Log(direction.TurningPoint);
-        }
-        Debug.Log("-----------");
-
-        ok = directionsWithTurningPoints.ToList();
-
-        Path route = this._seeker.StartPath(transform.position, ok[this._currentWaypoint].TurningPoint, (Path p) => { }, GraphMask.FromGraphName(this._directionToGraphNameMap[ok[this._currentWaypoint].Direction]));
-        await route.WaitForPath();
-        this._route = route;
-        this._seeker.drawGizmos = true;
-        this._seeker.detailedGizmos = true;
-        OnNextNodeChange?.Invoke(this._route.vectorPath[this._currentWaypoint]);
-    }
-
-    private void Update()
-    {
-        if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || this._target == null || this._route == null) { return; }
-
-        float distanceToNextWaypoint;
-
-        // Check in a loop if we are close enough to the current waypoint to switch to the next one
-        while (true)
-        {
-            distanceToNextWaypoint = Vector3.Distance(transform.position, this._route.vectorPath[this._currentWaypoint]);
-
-            if (distanceToNextWaypoint >= this._waypointEnteredDistance) { break; }
-            if (this._currentWaypoint + 1 >= this._route.vectorPath.Count)
-            {
-                // We reached the last waypoint
-                // this.GetNextDirection();
-                this.Doof();
-                break;
-            }
-
-            // Entered waypoint
-            this._currentWaypoint++;
-            OnNextNodeChange?.Invoke(this._route.vectorPath[this._currentWaypoint]);
-        }
-    }
-
-    List<DirectionWithTurningPoint> ok = new();
-
-    private int _directionSwitchCount = 0;
-
-    private async void Doof()
-    {
-        if (this._directionSwitchCount == ok.Count - 1)
-        {
-            this._route = null;
-            Debug.Log("REACHED TARGET WAYPOINT");
-            return;
-        }
-
-        this._currentWaypoint = 0;
-        this._route = null;
-        Path route;
-        if (this._directionSwitchCount + 1 < ok.Count - 1)
-        {
-            Debug.Log(1);
-            Vector3 startingPoint = ok[this._directionSwitchCount].TurningPoint;
-            PathDirection previousDirection = ok[this._directionSwitchCount].Direction;
-            PathDirection nextDirection = ok[this._directionSwitchCount + 1].Direction;
-
-            if (previousDirection == PathDirection.North || nextDirection == PathDirection.North)
-            {
-                startingPoint.z -= 5f;
-            }
-            if (previousDirection == PathDirection.East || nextDirection == PathDirection.East)
-            {
-                startingPoint.x -= 5f;
-            }
-            if (previousDirection == PathDirection.South || nextDirection == PathDirection.South)
-            {
-                startingPoint.z += 5f;
-            }
-            if (previousDirection == PathDirection.West || nextDirection == PathDirection.West)
-            {
-                startingPoint.x += 5f;
-            }
-
-            route = this._seeker.StartPath(startingPoint, ok[this._directionSwitchCount + 1].TurningPoint, (Path p) => { }, GraphMask.FromGraphName(this._directionToGraphNameMap[ok[this._directionSwitchCount + 1].Direction]));
-        }
-        else
-        {
-            Debug.Log(2);
-            Debug.Log("_directionSwitchCount");
-            Debug.Log(_directionSwitchCount);
-            Vector3 startingPoint = transform.position;
-            PathDirection previousDirection = ok[^2].Direction;
-            PathDirection nextDirection = ok[^1].Direction;
-            Debug.Log("previousDirection");
-            Debug.Log(previousDirection);
-            Debug.Log("nextDirection");
-            Debug.Log(nextDirection);
-
-            if (previousDirection == PathDirection.North || nextDirection == PathDirection.North)
-            {
-                startingPoint.z -= 5f;
-            }
-            if (previousDirection == PathDirection.East || nextDirection == PathDirection.East)
-            {
-                startingPoint.x -= 5f;
-            }
-            if (previousDirection == PathDirection.South || nextDirection == PathDirection.South)
-            {
-                startingPoint.z += 5f;
-            }
-            if (previousDirection == PathDirection.West || nextDirection == PathDirection.West)
-            {
-                startingPoint.x += 5f;
-            }
-
-            route = this._seeker.StartPath(startingPoint, this._target.position, (Path p) => { }, GraphMask.FromGraphName(this._directionToGraphNameMap[nextDirection]));
-        }
-        await route.WaitForPath();
-        this._route = route;
-        this._seeker.drawGizmos = true;
-        this._seeker.detailedGizmos = true;
-        OnNextNodeChange?.Invoke(this._route.vectorPath[this._currentWaypoint]);
-        this._directionSwitchCount++;
-    }
-
-    private async UniTask GetWholeRoute()
-    {
-        this._currentWaypoint = 0;
-        this._route = null;
-
-        Path route = this._seeker.StartPath(transform.position, this._target.position, (Path p) => { }, GraphMask.FromGraphName(_ALL_DIRECTIONS_GRAPH_NAME));
-        await route.WaitForPath();
-        this._route = route;
-        OnNextNodeChange?.Invoke(this._route.vectorPath[this._currentWaypoint]);
-    }
-
     private struct DirectionWithTurningPoint
     {
-        public PathDirection Direction;
-        public Vector3 TurningPoint;
+        public PathDirection Direction { get; private set; }
+        public Vector3 TurningPoint { get; private set; }
 
         public DirectionWithTurningPoint(PathDirection direction, Vector3 turningPoint)
         {
@@ -243,9 +57,133 @@ public class VehicleAiPathController : NetworkBehaviour
         }
     }
 
-    private List<DirectionWithTurningPoint> GetDirectionsWithTurningPointsForRoute()
+    private void Awake()
     {
-        PathDirection currentDirection = PathDirection.None;
+        this._seatController = GetComponent<VehicleSeatController>();
+        this._seeker = GetComponent<Seeker>();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        this._seatController.TestAiDriver();
+    }
+
+    private void Start() => this.GetWholeProperPath();
+
+    private void Update()
+    {
+        if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || this._target == null || this._currentDirectionPath == null) { return; }
+
+        float distanceToNextWaypoint;
+
+        // Check in a loop if we are close enough to the current waypoint to switch to the next one
+        while (true)
+        {
+            distanceToNextWaypoint = Vector3.Distance(transform.position, this._currentDirectionPath.vectorPath[this._currentWaypoint]);
+
+            if (distanceToNextWaypoint >= this._waypointEnteredDistance) { break; }
+            if (this._currentWaypoint + 1 >= this._currentDirectionPath.vectorPath.Count)
+            {
+                // We reached the last waypoint for the current direction
+                this.OnLastWaypointForDirectionReached();
+                break;
+            }
+
+            // Entered waypoint
+            this._currentWaypoint++;
+            OnNextNodeChange?.Invoke(this._currentDirectionPath.vectorPath[this._currentWaypoint]);
+        }
+    }
+
+    private async UniTask<Path> GetWholePathWithoutProperLanes()
+    {
+        this._seeker.drawGizmos = false;
+        this._seeker.detailedGizmos = false;
+        Path path = this._seeker.StartPath(transform.position, this._target.position, (Path p) => { }, GraphMask.FromGraphName(_ALL_DIRECTIONS_GRAPH_NAME));
+        await path.WaitForPath();
+        return path;
+    }
+
+    private async void GetWholeProperPath()
+    {
+        this._currentWaypoint = 0;
+        this._currentDirectionPath = null;
+        this._directionSwitchCount = 0;
+        Path pathWithoutProperLanes = await this.GetWholePathWithoutProperLanes();
+        this._directionsWithTurningPoints = this.GetDirectionsWithTurningPointsForPath(pathWithoutProperLanes);
+        await this.UpdatePath(transform.position, this._directionsWithTurningPoints.First().TurningPoint, this._directionsWithTurningPoints.First().Direction);
+    }
+
+    private async UniTask UpdatePath(Vector3 startPoint, Vector3 endPoint, PathDirection direction)
+    {
+        Path path = this._seeker.StartPath(startPoint, endPoint, (Path p) => { }, GraphMask.FromGraphName(_DIRECTION_TO_GRAPH_NAME_MAP[direction]));
+        await path.WaitForPath();
+        this._currentDirectionPath = path;
+        this._seeker.drawGizmos = true;
+        this._seeker.detailedGizmos = true;
+        OnNextNodeChange?.Invoke(this._currentDirectionPath.vectorPath[this._currentWaypoint]);
+    }
+
+    private Vector3 GetPointInDirection(Vector3 startingPoint, PathDirection[] directions, float moveInterval = 5f)
+    {
+        Vector3 newPoint = startingPoint;
+
+        foreach (PathDirection direction in directions)
+        {
+            if (direction == PathDirection.North)
+            {
+                newPoint.z -= moveInterval;
+            }
+            else if (direction == PathDirection.East)
+            {
+                newPoint.x -= moveInterval;
+            }
+            else if (direction == PathDirection.South)
+            {
+                newPoint.z += moveInterval;
+            }
+            else if (direction == PathDirection.West)
+            {
+                newPoint.x += moveInterval;
+            }
+        }
+
+        return newPoint;
+    }
+
+    private async void OnLastWaypointForDirectionReached()
+    {
+        if (this._directionSwitchCount == this._directionsWithTurningPoints.Count() - 1)
+        {
+            // Reached final waypoint
+            Destroy(gameObject);
+            this._currentWaypoint = 0;
+            this._currentDirectionPath = null;
+            this._directionSwitchCount = 0;
+            return;
+        }
+
+        this._seeker.drawGizmos = false;
+        this._seeker.detailedGizmos = false;
+        this._currentWaypoint = 0;
+        this._currentDirectionPath = null;
+
+        bool isOnLastStraightaway = this._directionSwitchCount + 1 == this._directionsWithTurningPoints.Count() - 1;
+        PathDirection previousDirection = this._directionsWithTurningPoints[this._directionSwitchCount].Direction;
+        PathDirection nextDirection = this._directionsWithTurningPoints[this._directionSwitchCount + 1].Direction;
+        Vector3 startPoint = isOnLastStraightaway ? transform.position : this._directionsWithTurningPoints[this._directionSwitchCount].TurningPoint;
+        startPoint = this.GetPointInDirection(startPoint, new[] { previousDirection, nextDirection });
+        Vector3 endPoint = isOnLastStraightaway ? this._target.position : this._directionsWithTurningPoints[this._directionSwitchCount + 1].TurningPoint;
+
+        await this.UpdatePath(startPoint, endPoint, nextDirection);
+        this._directionSwitchCount++;
+    }
+
+    private bool IsPointInDirection(Vector3 startPoint, Vector3 endPoint, PathDirection direction) => direction == PathDirection.North && startPoint.z > endPoint.z || direction == PathDirection.East && startPoint.x > endPoint.x || direction == PathDirection.South && startPoint.z < endPoint.z || direction == PathDirection.West && startPoint.x < endPoint.x;
+
+    private DirectionWithTurningPoint[] GetDirectionsWithTurningPointsForPath(Path path)
+    {
         List<PathDirection> directions = new();
         List<DirectionWithTurningPoint> directionsWithTurningPoint = new();
         int northCounts = 0;
@@ -257,166 +195,113 @@ public class VehicleAiPathController : NetworkBehaviour
         int westCounts = 0;
         int iterationWestWasIncremented = 0;
 
-        for (int i = 1; i < this._route.vectorPath.Count; i++)
+        for (int i = 1; i < path.vectorPath.Count; i++)
         {
-            Vector3 previousWaypointNode = this._route.vectorPath[i - 1];
-            Vector3 waypointNode = this._route.vectorPath[i];
+            Vector3 previousWaypointNode = path.vectorPath[i - 1];
+            Vector3 waypointNode = path.vectorPath[i];
 
-            if (previousWaypointNode.z > waypointNode.z)
+            // Logic so the counts only become 2 when moving in a new direction twice
+            if (this.IsPointInDirection(previousWaypointNode, waypointNode, PathDirection.North))
             {
-                if (iterationNorthWasIncremented == i - 1)
-                {
-                    northCounts++;
-                }
-                else
-                {
-                    northCounts = 1;
-                }
-
+                northCounts = iterationNorthWasIncremented == i - 1 ? northCounts + 1 : 1;
                 iterationNorthWasIncremented = i;
             }
-            if (previousWaypointNode.x > waypointNode.x)
+            if (this.IsPointInDirection(previousWaypointNode, waypointNode, PathDirection.East))
             {
-                if (iterationEastWasIncremented == i - 1)
-                {
-                    eastCounts++;
-                }
-                else
-                {
-                    eastCounts = 1;
-                }
+                eastCounts = iterationEastWasIncremented == i - 1 ? eastCounts + 1 : 1;
                 iterationEastWasIncremented = i;
             }
-            if (previousWaypointNode.z < waypointNode.z)
+            if (this.IsPointInDirection(previousWaypointNode, waypointNode, PathDirection.South))
             {
-                if (iterationSouthWasIncremented == i - 1)
-                {
-                    southCounts++;
-                }
-                else
-                {
-                    southCounts = 1;
-                }
+                southCounts = iterationSouthWasIncremented == i - 1 ? southCounts + 1 : 1;
                 iterationSouthWasIncremented = i;
             }
-            if (previousWaypointNode.x < waypointNode.x)
+            if (this.IsPointInDirection(previousWaypointNode, waypointNode, PathDirection.West))
             {
-                if (iterationWestWasIncremented == i - 1)
-                {
-                    westCounts++;
-                }
-                else
-                {
-                    westCounts = 1;
-                }
-
+                westCounts = iterationWestWasIncremented == i - 1 ? westCounts + 1 : 1;
                 iterationWestWasIncremented = i;
             }
 
             if (northCounts == 2)
             {
-                currentDirection = PathDirection.North;
+                directions.Add(PathDirection.North);
                 eastCounts = 0;
                 southCounts = 0;
                 westCounts = 0;
-                directions.Add(currentDirection);
 
                 if (directions.Count > 1)
                 {
-                    PathDirection previousDirection = directions[directions.Count - 2];
+                    PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
-                    bool isTurningLeft = currentDirection == PathDirection.North && previousDirection == PathDirection.East || currentDirection == PathDirection.East && previousDirection == PathDirection.South || currentDirection == PathDirection.South && previousDirection == PathDirection.West || currentDirection == PathDirection.West && previousDirection == PathDirection.North;
-                    // turningPoint.z += 10f;
+                    bool isTurningLeft = previousDirection == PathDirection.East;
+
                     if (isTurningLeft)
-                    {
-                        turningPoint.z += 15f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.South }, 15f);
                     else
-                    {
-                        turningPoint.z += 10f;
-                        turningPoint.x -= 5f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.South, PathDirection.South, PathDirection.East });
 
                     directionsWithTurningPoint.Add(new(previousDirection, turningPoint));
                 }
             }
             else if (eastCounts == 2)
             {
-                currentDirection = PathDirection.East;
+                directions.Add(PathDirection.East);
                 northCounts = 0;
                 southCounts = 0;
                 westCounts = 0;
-                directions.Add(currentDirection);
 
                 if (directions.Count > 1)
                 {
-                    PathDirection previousDirection = directions[directions.Count - 2];
+                    PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
-                    bool isTurningLeft = currentDirection == PathDirection.North && previousDirection == PathDirection.East || currentDirection == PathDirection.East && previousDirection == PathDirection.South || currentDirection == PathDirection.South && previousDirection == PathDirection.West || currentDirection == PathDirection.West && previousDirection == PathDirection.North;
-                    // turningPoint.x += 10f;
+                    bool isTurningLeft = previousDirection == PathDirection.South;
+
                     if (isTurningLeft)
-                    {
-                        turningPoint.x += 15f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.West }, 15f);
                     else
-                    {
-                        turningPoint.x += 10f;
-                        turningPoint.z += 5f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.West, PathDirection.West, PathDirection.South });
 
                     directionsWithTurningPoint.Add(new(previousDirection, turningPoint));
                 }
             }
             else if (southCounts == 2)
             {
-                currentDirection = PathDirection.South;
+                directions.Add(PathDirection.South);
                 northCounts = 0;
                 eastCounts = 0;
                 westCounts = 0;
-                directions.Add(currentDirection);
 
                 if (directions.Count > 1)
                 {
-                    PathDirection previousDirection = directions[directions.Count - 2];
+                    PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
-                    bool isTurningLeft = currentDirection == PathDirection.North && previousDirection == PathDirection.East || currentDirection == PathDirection.East && previousDirection == PathDirection.South || currentDirection == PathDirection.South && previousDirection == PathDirection.West || currentDirection == PathDirection.West && previousDirection == PathDirection.North;
-                    // turningPoint.z -= 10f;
+                    bool isTurningLeft = previousDirection == PathDirection.West;
+
                     if (isTurningLeft)
-                    {
-                        turningPoint.z -= 15f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.North }, 15f);
                     else
-                    {
-                        turningPoint.z -= 10f;
-                        turningPoint.x += 5f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.North, PathDirection.North, PathDirection.West });
 
                     directionsWithTurningPoint.Add(new(previousDirection, turningPoint));
                 }
             }
             else if (westCounts == 2)
             {
-                currentDirection = PathDirection.West;
+                directions.Add(PathDirection.West);
                 northCounts = 0;
                 eastCounts = 0;
                 southCounts = 0;
-                directions.Add(currentDirection);
 
                 if (directions.Count > 1)
                 {
-                    PathDirection previousDirection = directions[directions.Count - 2];
+                    PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
-                    bool isTurningLeft = currentDirection == PathDirection.North && previousDirection == PathDirection.East || currentDirection == PathDirection.East && previousDirection == PathDirection.South || currentDirection == PathDirection.South && previousDirection == PathDirection.West || currentDirection == PathDirection.West && previousDirection == PathDirection.North;
-                    // turningPoint.x -= 10f;
+                    bool isTurningLeft = previousDirection == PathDirection.North;
+
                     if (isTurningLeft)
-                    {
-                        turningPoint.x -= 15f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.East }, 15f);
                     else
-                    {
-                        turningPoint.x -= 10f;
-                        turningPoint.z -= 5f;
-                    }
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.East, PathDirection.East, PathDirection.North });
 
                     directionsWithTurningPoint.Add(new(previousDirection, turningPoint));
                 }
@@ -425,7 +310,6 @@ public class VehicleAiPathController : NetworkBehaviour
 
         // Add last direction
         directionsWithTurningPoint.Add(new(directions.Last(), Vector3.zero));
-
-        return directionsWithTurningPoint;
+        return directionsWithTurningPoint.ToArray();
     }
 }
