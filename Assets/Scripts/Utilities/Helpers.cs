@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -16,7 +17,12 @@ public static class Helpers
     /// </summary>
     public static void DestroyChildren(this Transform t)
     {
-        foreach (Transform child in t) Object.Destroy(child.gameObject);
+        foreach (Transform child in t) UnityEngine.Object.Destroy(child.gameObject);
+    }
+
+    public static bool IsEqual(this Vector3 v1, Vector3 v2)
+    {
+        return Math.Abs(v1.x - v2.x) < 0.001f && Math.Abs(v1.y - v2.y) < 0.001f && Math.Abs(v1.z - v2.z) < 0.001f;
     }
 
     public static T[] ToArray<T>(IReadOnlyList<T> readOnlyList)
