@@ -27,6 +27,11 @@ public class VehicleAiPathController : NetworkBehaviour
     private const string _SOUTH_DIRECTION_GRAPH_NAME = "South";
     private const string _WEST_DIRECTION_GRAPH_NAME = "West";
 
+    private static Vector3[] _ALL_NORTH_POINTS;
+    private static Vector3[] _ALL_EAST_POINTS;
+    private static Vector3[] _ALL_SOUTH_POINTS;
+    private static Vector3[] _ALL_WEST_POINTS;
+
     private enum PathDirection
     {
         North,
@@ -61,6 +66,14 @@ public class VehicleAiPathController : NetworkBehaviour
     {
         this._seatController = GetComponent<VehicleSeatController>();
         this._seeker = GetComponent<Seeker>();
+
+        if (_ALL_NORTH_POINTS == null)
+        {
+            _ALL_NORTH_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.NorthDirection).Select(obj => obj.transform.position).ToArray();
+            _ALL_EAST_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.EastDirection).Select(obj => obj.transform.position).ToArray();
+            _ALL_SOUTH_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.SouthDirection).Select(obj => obj.transform.position).ToArray();
+            _ALL_WEST_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.WestDirection).Select(obj => obj.transform.position).ToArray();
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -235,6 +248,12 @@ public class VehicleAiPathController : NetworkBehaviour
                     Vector3 turningPoint = waypointNode;
                     bool isTurningLeft = previousDirection == PathDirection.East;
 
+                    // Ensure turning point is set to the correct point before more calculations because A* path is inconsistent
+                    if (isTurningLeft && _ALL_NORTH_POINTS.Any(northPoint => northPoint.IsEqual(turningPoint)))
+                    {
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.West });
+                    }
+
                     if (isTurningLeft)
                         turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.South }, 15f);
                     else
@@ -255,6 +274,12 @@ public class VehicleAiPathController : NetworkBehaviour
                     PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
                     bool isTurningLeft = previousDirection == PathDirection.South;
+
+                    // Ensure turning point is set to the correct point before more calculations because A* path is inconsistent
+                    if (isTurningLeft && _ALL_EAST_POINTS.Any(eastPoint => eastPoint.IsEqual(turningPoint)))
+                    {
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.North });
+                    }
 
                     if (isTurningLeft)
                         turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.West }, 15f);
@@ -277,6 +302,12 @@ public class VehicleAiPathController : NetworkBehaviour
                     Vector3 turningPoint = waypointNode;
                     bool isTurningLeft = previousDirection == PathDirection.West;
 
+                    // Ensure turning point is set to the correct point before more calculations because A* path is inconsistent
+                    if (isTurningLeft && _ALL_SOUTH_POINTS.Any(southPoint => southPoint.IsEqual(turningPoint)))
+                    {
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.East });
+                    }
+
                     if (isTurningLeft)
                         turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.North }, 15f);
                     else
@@ -297,6 +328,12 @@ public class VehicleAiPathController : NetworkBehaviour
                     PathDirection previousDirection = directions[^2];
                     Vector3 turningPoint = waypointNode;
                     bool isTurningLeft = previousDirection == PathDirection.North;
+
+                    // Ensure turning point is set to the correct point before more calculations because A* path is inconsistent
+                    if (isTurningLeft && _ALL_WEST_POINTS.Any(westPoint => westPoint.IsEqual(turningPoint)))
+                    {
+                        turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.South });
+                    }
 
                     if (isTurningLeft)
                         turningPoint = this.GetPointInDirection(turningPoint, new[] { PathDirection.East }, 15f);
