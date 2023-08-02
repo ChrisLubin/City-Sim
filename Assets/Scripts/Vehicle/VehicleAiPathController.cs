@@ -6,6 +6,8 @@ using Pathfinding;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(VehicleAiMovementController))]
+[RequireComponent(typeof(Seeker))]
 public class VehicleAiPathController : NetworkBehaviour
 {
     private VehicleSeatController _seatController;
@@ -82,7 +84,11 @@ public class VehicleAiPathController : NetworkBehaviour
         this._seatController.TestAiDriver();
     }
 
-    private void Start() => this.GetWholeProperPath();
+    private void Start()
+    {
+        this._target = GameObject.FindGameObjectWithTag("ThirdTarget").transform;
+        this.GetWholeProperPath();
+    }
 
     private void Update()
     {

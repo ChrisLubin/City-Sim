@@ -435,6 +435,9 @@ GameObject:
   - component: {fileID: 4406575881905867310}
   - component: {fileID: 6562857419900748140}
   - component: {fileID: 4770470050596037425}
+  - component: {fileID: 189981210788459069}
+  - component: {fileID: 1459944244328529471}
+  - component: {fileID: 545881254490015600}
   m_Layer: 7
   m_Name: SM_Veh_Convertable_01
   m_TagString: Untagged
@@ -459,6 +462,7 @@ Transform:
   - {fileID: 6661512061014245343}
   - {fileID: 1917154764008271383}
   - {fileID: 218661556827359551}
+  - {fileID: 4435258253471959432}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -593,7 +597,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.4172075, y: 0.17, z: 5.1057415}
+  m_Size: {x: 2.4172075, y: 0.6, z: 5.1057415}
   m_Center: {x: 0, y: 0.75031865, z: -0.072930336}
 --- !u!114 &1928009082797801330
 MonoBehaviour:
@@ -675,6 +679,66 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxPlayerDistanceCheck: 8
+--- !u!114 &189981210788459069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847148240549790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27e76e0e55c0af4da5f0a56d8957830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _frontOfVehicle: {fileID: 4435258253471959432}
+  _maxCollisionLengthDistanceCheck: 7
+  _maxCollisionWidthDistanceCheck: 4
+  _maxCollisionHeightDistanceCheck: 0.4
+  _turnThreshold: 1
+  _maxSpeed: 15
+--- !u!114 &1459944244328529471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847148240549790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f613a9fccd809e94fbd8c6c5f7f0b1b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _waypointEnteredDistance: 3
+  _target: {fileID: 0}
+--- !u!114 &545881254490015600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847148240549790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 373b52eb9bf8c40f785bb6947a1aee66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  drawGizmos: 0
+  detailedGizmos: 0
+  startEndModifier:
+    addPoints: 0
+    exactStartPoint: 4
+    exactEndPoint: 4
+    useRaycasting: 0
+    mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    useGraphRaycasting: 0
+  traversableTags: -1
+  tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  graphMask:
+    value: 0
 --- !u!1 &1925197282100688
 GameObject:
   m_ObjectHideFlags: 0
@@ -806,6 +870,37 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!1 &1163945372169070817
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4435258253471959432}
+  m_Layer: 7
+  m_Name: FrontOfVehicle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4435258253471959432
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163945372169070817}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.571, z: 2.500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4393807827511222}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3199388454541344183
 GameObject:
   m_ObjectHideFlags: 0

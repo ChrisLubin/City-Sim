@@ -103,6 +103,9 @@ GameObject:
   - component: {fileID: 1152418702661623785}
   - component: {fileID: 4470278531724222050}
   - component: {fileID: 3626796853260061903}
+  - component: {fileID: 5453131547117174292}
+  - component: {fileID: 8954498708074880524}
+  - component: {fileID: 5674413251742370509}
   m_Layer: 7
   m_Name: SM_Veh_Truck_01
   m_TagString: Untagged
@@ -348,6 +351,66 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxPlayerDistanceCheck: 11
+--- !u!114 &5453131547117174292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019793266773332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27e76e0e55c0af4da5f0a56d8957830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _frontOfVehicle: {fileID: 3341907311140210099}
+  _maxCollisionLengthDistanceCheck: 7
+  _maxCollisionWidthDistanceCheck: 4
+  _maxCollisionHeightDistanceCheck: 1
+  _turnThreshold: 1
+  _maxSpeed: 15
+--- !u!114 &8954498708074880524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019793266773332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f613a9fccd809e94fbd8c6c5f7f0b1b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _waypointEnteredDistance: 3
+  _target: {fileID: 0}
+--- !u!114 &5674413251742370509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019793266773332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 373b52eb9bf8c40f785bb6947a1aee66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  drawGizmos: 0
+  detailedGizmos: 0
+  startEndModifier:
+    addPoints: 0
+    exactStartPoint: 4
+    exactEndPoint: 4
+    useRaycasting: 0
+    mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    useGraphRaycasting: 0
+  traversableTags: -1
+  tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  graphMask:
+    value: 0
 --- !u!1 &1108815790798554
 GameObject:
   m_ObjectHideFlags: 0

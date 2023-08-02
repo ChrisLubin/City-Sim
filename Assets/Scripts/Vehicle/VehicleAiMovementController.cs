@@ -1,7 +1,10 @@
 using System.Linq;
+using Pathfinding;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(VehicleAiPathController))]
+[RequireComponent(typeof(Seeker))]
 public class VehicleAiMovementController : NetworkBehaviour
 {
     private VehicleMovementController _movementController;
@@ -14,7 +17,7 @@ public class VehicleAiMovementController : NetworkBehaviour
     [SerializeField] private float _maxCollisionHeightDistanceCheck = 1f;
     [SerializeField] private float _turnThreshold = 1f;
 
-    [SerializeField] private float _maxSpeed = 3f;
+    [SerializeField] private float _maxSpeed = 15f;
 
     private Vector3 _target = Vector3.zero;
     private bool _hasTarget { get => this._target != Vector3.zero; }

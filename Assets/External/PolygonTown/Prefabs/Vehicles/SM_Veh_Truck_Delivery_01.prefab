@@ -20,6 +20,9 @@ GameObject:
   - component: {fileID: 1846904541921908506}
   - component: {fileID: 2542616568278188974}
   - component: {fileID: 1657692645501655205}
+  - component: {fileID: 7160566574375610631}
+  - component: {fileID: 5918858890157470523}
+  - component: {fileID: 1095207149051972713}
   m_Layer: 7
   m_Name: SM_Veh_Truck_Delivery_01
   m_TagString: Untagged
@@ -46,6 +49,7 @@ Transform:
   - {fileID: 4800241589651486}
   - {fileID: 9175226368046861431}
   - {fileID: 6414666884048923048}
+  - {fileID: 6377391290622572326}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -262,6 +266,66 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxPlayerDistanceCheck: 11
+--- !u!114 &7160566574375610631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1027750582790248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27e76e0e55c0af4da5f0a56d8957830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _frontOfVehicle: {fileID: 6377391290622572326}
+  _maxCollisionLengthDistanceCheck: 7
+  _maxCollisionWidthDistanceCheck: 4
+  _maxCollisionHeightDistanceCheck: 1
+  _turnThreshold: 1
+  _maxSpeed: 15
+--- !u!114 &5918858890157470523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1027750582790248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f613a9fccd809e94fbd8c6c5f7f0b1b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _waypointEnteredDistance: 3
+  _target: {fileID: 0}
+--- !u!114 &1095207149051972713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1027750582790248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 373b52eb9bf8c40f785bb6947a1aee66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  drawGizmos: 0
+  detailedGizmos: 0
+  startEndModifier:
+    addPoints: 0
+    exactStartPoint: 4
+    exactEndPoint: 4
+    useRaycasting: 0
+    mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    useGraphRaycasting: 0
+  traversableTags: -1
+  tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  graphMask:
+    value: 0
 --- !u!1 &1081753108232072
 GameObject:
   m_ObjectHideFlags: 0
@@ -1734,6 +1798,37 @@ WheelCollider:
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_Enabled: 1
+--- !u!1 &4357609008794887569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6377391290622572326}
+  m_Layer: 7
+  m_Name: FrontOfVehicle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6377391290622572326
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4357609008794887569}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.548, z: 3.79}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4680266011933640}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5271327319239855401
 GameObject:
   m_ObjectHideFlags: 0
