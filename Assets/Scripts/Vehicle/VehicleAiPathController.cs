@@ -131,7 +131,8 @@ public class VehicleAiPathController : NetworkBehaviour
         this._directionSwitchCount = 0;
         Path pathWithoutProperLanes = await this.GetWholePathWithoutProperLanes();
         this._directionsWithTurningPoints = this.GetDirectionsWithTurningPointsForPath(pathWithoutProperLanes);
-        await this.UpdatePath(transform.position, this._directionsWithTurningPoints.First().TurningPoint, this._directionsWithTurningPoints.First().Direction);
+        bool isOnlyOneDirection = this._directionsWithTurningPoints.Count() == 1;
+        await this.UpdatePath(transform.position, !isOnlyOneDirection ? this._directionsWithTurningPoints.First().TurningPoint : this._target.position, this._directionsWithTurningPoints.First().Direction);
     }
 
     private async UniTask UpdatePath(Vector3 startPoint, Vector3 endPoint, PathDirection direction)
