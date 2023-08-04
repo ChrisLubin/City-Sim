@@ -9,7 +9,7 @@ TagManager:
   - AiVehicleNavigationEastDirection
   - AiVehicleNavigationSouthDirection
   - AiVehicleNavigationWestDirection
-  - ThirdTarget
+  - TestTarget
   layers:
   - Default
   - TransparentFX

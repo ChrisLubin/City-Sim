@@ -84,10 +84,17 @@ public class VehicleAiPathController : NetworkBehaviour
         this._seatController.TestAiDriver();
     }
 
-    private void Start()
+    private async void Start()
     {
-        this._target = GameObject.FindGameObjectWithTag("ThirdTarget").transform;
-        this.GetWholeProperPath();
+        if (this._target == null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            await this.GetWholeProperPath();
+            this.FixStartingPositionAndRotation();
+        }
     }
 
     private void Update()
@@ -124,7 +131,7 @@ public class VehicleAiPathController : NetworkBehaviour
         return path;
     }
 
-    private async void GetWholeProperPath()
+    private async UniTask GetWholeProperPath()
     {
         this._currentWaypoint = 0;
         this._currentDirectionPath = null;
@@ -355,5 +362,35 @@ public class VehicleAiPathController : NetworkBehaviour
         // Add last direction
         directionsWithTurningPoint.Add(new(directions.Last(), Vector3.zero));
         return directionsWithTurningPoint.ToArray();
+    }
+
+    private PathDirection GetDirectionCurrentlyFacing()
+    {
+        PathDirection direction = PathDirection.None;
+        float xRotation = transform.forward.x;
+        float zRotation = transform.forward.z;
+
+        if (xRotation <= 0.75f && xRotation >= 0f && zRotation < 0f || xRotation >= -0.75f && xRotation <= 0f && zRotation < 0f)
+            direction = PathDirection.North;
+        else if (xRotation <= -0.75f && xRotation >= -1f)
+            direction = PathDirection.East;
+        else if (xRotation >= -0.75f && xRotation <= 0f && zRotation > 0f || xRotation <= 0.75f && xRotation >= 0f && zRotation > 0f)
+            direction = PathDirection.South;
+        else if (xRotation >= 0.75f)
+            direction = PathDirection.West;
+
+        return direction;
+    }
+
+    private void FixStartingPositionAndRotation()
+    {
+        if (this._directionsWithTurningPoints.Count() == 0) { return; }
+
+        PathDirection firstPathDirection = this._directionsWithTurningPoints.First().Direction;
+        PathDirection directionCurrentlyFacing = this.GetDirectionCurrentlyFacing();
+
+        if (firstPathDirection == directionCurrentlyFacing) { return; }
+        transform.position = this._currentDirectionPath.vectorPath[0];
+        transform.LookAt(this.GetPointInDirection(transform.position, new[] { firstPathDirection }));
     }
 }
