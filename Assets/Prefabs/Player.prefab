@@ -1703,15 +1703,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TransitionStateInfoList:
   - Layer: 0
-    OriginatingState: -526601997
+    OriginatingState: 989149621
     DestinationState: 1590449116
     TransitionDuration: 1
     TriggerNameHash: 1687669060
     TransitionIndex: 0
   - Layer: 0
-    OriginatingState: 1744665739
+    OriginatingState: -1902905838
     DestinationState: 1590449116
     TransitionDuration: 0.25
+    TriggerNameHash: 1687669060
+    TransitionIndex: 0
+  - Layer: 0
+    OriginatingState: -309754287
+    DestinationState: 1590449116
+    TransitionDuration: 0.25
+    TriggerNameHash: 1687669060
+    TransitionIndex: 0
+  - Layer: 0
+    OriginatingState: -1517300011
+    DestinationState: 1590449116
+    TransitionDuration: 0.25
+    TriggerNameHash: 1687669060
+    TransitionIndex: 0
+  - Layer: 0
+    OriginatingState: 125937960
+    DestinationState: 1590449116
+    TransitionDuration: 0.25
+    TriggerNameHash: 1687669060
+    TransitionIndex: 4
+  - Layer: 0
+    OriginatingState: -568685857
+    DestinationState: 1590449116
+    TransitionDuration: 0
     TriggerNameHash: 1687669060
     TransitionIndex: 0
   m_Animator: {fileID: 1028259186136644898}
@@ -3050,7 +3074,7 @@ GameObject:
   - component: {fileID: 795648243527321566}
   - component: {fileID: 8211209269559267855}
   - component: {fileID: 3375403137268105594}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3138,7 +3162,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
