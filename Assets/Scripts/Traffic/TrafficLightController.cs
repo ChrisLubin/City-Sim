@@ -24,13 +24,6 @@ public class TrafficLightController : MonoBehaviour
     private IDictionary<LightColor, Material> _lightColorToNormalLightMaterialMap;
     private IDictionary<LightColor, Material> _lightColorToGlowLightMaterialMap;
 
-    public enum LightColor
-    {
-        Red,
-        Yellow,
-        Green,
-    }
-
     private enum LightMaterialType
     {
         Normal,
@@ -42,35 +35,18 @@ public class TrafficLightController : MonoBehaviour
         this.InitializeMaps();
     }
 
-    private float _timeSinceLastChange = 0f;
-    private LightColor _currentColor = LightColor.Green;
-
-    private void Update()
-    {
-        this._timeSinceLastChange += Time.deltaTime;
-
-        if (this._timeSinceLastChange <= 1f) { return; }
-
-        if (this._currentColor == LightColor.Green)
-        {
-            this._currentColor = LightColor.Red;
-        }
-        else if (this._currentColor == LightColor.Red)
-        {
-            this._currentColor = LightColor.Yellow;
-        }
-        else if (this._currentColor == LightColor.Yellow)
-        {
-            this._currentColor = LightColor.Green;
-        }
-        this.ChangeLight(this._currentColor);
-        this._timeSinceLastChange = 0f;
-    }
-
     public void ChangeLight(LightColor color)
     {
         this.TurnOffAllLights();
         this.TurnOnLights(color);
+    }
+
+    public void TurnOnPedestrianStopLight()
+    {
+        if (!this._pedestrianGreenLight.gameObject.activeSelf && this._pedestrianRedLight.activeSelf) { return; }
+
+        this._pedestrianGreenLight.SetActive(false);
+        this._pedestrianRedLight.SetActive(true);
     }
 
     private Material GetLightMaterial(LightColor color, LightMaterialType type)
@@ -152,4 +128,11 @@ public class TrafficLightController : MonoBehaviour
             { LightColor.Green, this._glowGreenLightMaterial },
         };
     }
+}
+
+public enum LightColor
+{
+    Red,
+    Yellow,
+    Green,
 }

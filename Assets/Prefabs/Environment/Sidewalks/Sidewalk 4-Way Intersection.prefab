@@ -124,6 +124,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6423047695417715343}
+  - component: {fileID: 1863043778738826682}
   m_Layer: 0
   m_Name: Sidewalk 4-Way Intersection
   m_TagString: Untagged
@@ -161,6 +162,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1863043778738826682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2481472698422676557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21d56e818bb892a49856e1376146182f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _northSouthTrafficLights:
+  - {fileID: 4534130030404839950}
+  - {fileID: 8548221078536768007}
+  _eastWestTrafficLights:
+  - {fileID: 4672643004707836809}
+  - {fileID: 6457099958747221074}
 --- !u!1 &8379700965223916200
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,6 +423,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9952bd355ad1b5e49866a65f006839eb, type: 3}
+--- !u!114 &6457099958747221074 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6665491478880256325, guid: 9952bd355ad1b5e49866a65f006839eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 368361807625866519}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abb528afa16be54fa03a34fd7418753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &8129647387300049000 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8488968797585145215, guid: 9952bd355ad1b5e49866a65f006839eb,
@@ -530,6 +561,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9952bd355ad1b5e49866a65f006839eb, type: 3}
+--- !u!114 &4672643004707836809 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6665491478880256325, guid: 9952bd355ad1b5e49866a65f006839eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 2042388070671454924}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abb528afa16be54fa03a34fd7418753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &7608520426044649395 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8488968797585145215, guid: 9952bd355ad1b5e49866a65f006839eb,
@@ -611,6 +654,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3035976903304268610}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8548221078536768007 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6665491478880256325, guid: 9952bd355ad1b5e49866a65f006839eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 3035976903304268610}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abb528afa16be54fa03a34fd7418753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3899415117476385877
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -882,6 +937,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7092292080939772747}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4534130030404839950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6665491478880256325, guid: 9952bd355ad1b5e49866a65f006839eb,
+    type: 3}
+  m_PrefabInstance: {fileID: 7092292080939772747}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5abb528afa16be54fa03a34fd7418753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7766422341827707976
 PrefabInstance:
   m_ObjectHideFlags: 0
