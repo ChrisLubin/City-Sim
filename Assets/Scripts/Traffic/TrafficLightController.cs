@@ -10,8 +10,10 @@ public class TrafficLightController : MonoBehaviour
     [SerializeField] private MeshRenderer[] _vehicleGreenLightsMeshRenderer;
 
     [Header("Pedestrian Lights")]
-    [SerializeField] private GameObject _pedestrianRedLight;
-    [SerializeField] private GameObject _pedestrianGreenLight;
+    [SerializeField] private GameObject _pedestrianRedLightWithSameDirection;
+    [SerializeField] private GameObject _pedestrianGreenLightWithSameDirection;
+    [SerializeField] private GameObject _pedestrianRedLightWithDiffDirection;
+    [SerializeField] private GameObject _pedestrianGreenLightWithDiffDirection;
 
     [Header("Light Materials")]
     [SerializeField] private Material _normalRedLightMaterial;
@@ -25,7 +27,8 @@ public class TrafficLightController : MonoBehaviour
     private IDictionary<LightColor, Material> _lightColorToNormalLightMaterialMap;
     private IDictionary<LightColor, Material> _lightColorToGlowLightMaterialMap;
 
-    private bool _isFlashingPedestrianStopLight = false;
+    private bool _isFlashingPedestrianStopLightWithSameDirection = false;
+    private bool _isFlashingPedestrianStopLightWithDiffDirection = false;
     private const float _FLASHING_PEDESTRIAN_LIGHT_TIME = 0.7f;
 
     private enum LightMaterialType
@@ -39,90 +42,89 @@ public class TrafficLightController : MonoBehaviour
         this.InitializeMaps();
     }
 
-    public void ChangeLight(LightColor color)
+    public void StopFlashingPedestrianStopLight(bool hasSameDirectionAsVehicleLights)
     {
-        this.TurnOffAllLights();
-        this.TurnOnLights(color);
+        if (hasSameDirectionAsVehicleLights)
+            this._isFlashingPedestrianStopLightWithSameDirection = false;
+        else
+            this._isFlashingPedestrianStopLightWithDiffDirection = false;
     }
 
-    public async void StartFlashingPedestrianStopLight()
+    public async void StartFlashingPedestrianStopLight(bool hasSameDirectionAsVehicleLights)
     {
-        if (this._isFlashingPedestrianStopLight) { return; }
+        if (this.GetIsFlashingPedestrianStopLight(hasSameDirectionAsVehicleLights)) { return; }
+        GameObject pedestrianGreenLight = hasSameDirectionAsVehicleLights ? this._pedestrianGreenLightWithSameDirection : this._pedestrianGreenLightWithDiffDirection;
+        GameObject pedestrianRedLight = hasSameDirectionAsVehicleLights ? this._pedestrianRedLightWithSameDirection : this._pedestrianRedLightWithDiffDirection;
 
-        this._isFlashingPedestrianStopLight = true;
-        this._pedestrianGreenLight.SetActive(false);
+        if (hasSameDirectionAsVehicleLights)
+            this._isFlashingPedestrianStopLightWithSameDirection = true;
+        else
+            this._isFlashingPedestrianStopLightWithDiffDirection = true;
 
-        while (this._isFlashingPedestrianStopLight)
+        pedestrianGreenLight.SetActive(false);
+
+        while (this.GetIsFlashingPedestrianStopLight(hasSameDirectionAsVehicleLights))
         {
-            this._pedestrianRedLight.SetActive(true);
+            pedestrianRedLight.SetActive(true);
             await UniTask.WaitForSeconds(_FLASHING_PEDESTRIAN_LIGHT_TIME);
 
-            if (!this._isFlashingPedestrianStopLight)
+            if (!this.GetIsFlashingPedestrianStopLight(hasSameDirectionAsVehicleLights))
                 break;
 
-            this._pedestrianRedLight.SetActive(false);
+            pedestrianRedLight.SetActive(false);
             await UniTask.WaitForSeconds(_FLASHING_PEDESTRIAN_LIGHT_TIME);
         }
     }
 
-    public void StopFlashingPedestrianStopLight() => this._isFlashingPedestrianStopLight = false;
+    public void ChangePedestrianLight(LightColor color, bool hasSameDirectionAsVehicleLights)
+    {
+        GameObject greenPedestrianLight = hasSameDirectionAsVehicleLights ? this._pedestrianGreenLightWithSameDirection : this._pedestrianGreenLightWithDiffDirection;
+        GameObject redPedestrianLight = hasSameDirectionAsVehicleLights ? this._pedestrianRedLightWithSameDirection : this._pedestrianRedLightWithDiffDirection;
+
+        if (color == LightColor.Green)
+        {
+            greenPedestrianLight.SetActive(true);
+            redPedestrianLight.SetActive(false);
+        }
+        else if (color == LightColor.Red)
+        {
+            greenPedestrianLight.SetActive(false);
+            redPedestrianLight.SetActive(true);
+        }
+    }
+
+    public void ChangeVehicleLights(LightColor color)
+    {
+        this.TurnOffAllVehicleLights();
+
+        foreach (MeshRenderer meshRenderers in this._lightColorToVehicleLightsMeshRendererMap[color])
+        {
+            meshRenderers.material = this.GetLightMaterial(color, LightMaterialType.Glow);
+        }
+    }
+
+    private void TurnOffAllVehicleLights()
+    {
+        foreach (MeshRenderer meshRenderers in this._lightColorToVehicleLightsMeshRendererMap[LightColor.Red])
+        {
+            meshRenderers.material = this.GetLightMaterial(LightColor.Red, LightMaterialType.Normal);
+        }
+        foreach (MeshRenderer meshRenderers in this._lightColorToVehicleLightsMeshRendererMap[LightColor.Yellow])
+        {
+            meshRenderers.material = this.GetLightMaterial(LightColor.Yellow, LightMaterialType.Normal);
+        }
+        foreach (MeshRenderer meshRenderers in this._lightColorToVehicleLightsMeshRendererMap[LightColor.Green])
+        {
+            meshRenderers.material = this.GetLightMaterial(LightColor.Green, LightMaterialType.Normal);
+        }
+    }
+
+    private bool GetIsFlashingPedestrianStopLight(bool hasSameDirectionAsVehicleLights) => hasSameDirectionAsVehicleLights ? this._isFlashingPedestrianStopLightWithSameDirection : this._isFlashingPedestrianStopLightWithDiffDirection;
 
     private Material GetLightMaterial(LightColor color, LightMaterialType type)
     {
         IDictionary<LightColor, Material> materialMap = type == LightMaterialType.Normal ? this._lightColorToNormalLightMaterialMap : this._lightColorToGlowLightMaterialMap;
         return materialMap[color];
-    }
-
-    private void TurnOffAllLights()
-    {
-        this.TurnOffLights(LightColor.Red);
-        this.TurnOffLights(LightColor.Yellow);
-        this.TurnOffLights(LightColor.Green);
-    }
-
-    private void TurnOnLights(LightColor color)
-    {
-        MeshRenderer[] lightMeshRenderers = this._lightColorToVehicleLightsMeshRendererMap[color];
-        foreach (MeshRenderer meshRenderers in lightMeshRenderers)
-        {
-            meshRenderers.material = this.GetLightMaterial(color, LightMaterialType.Glow);
-        }
-
-        switch (color)
-        {
-            case LightColor.Red:
-                this._pedestrianRedLight.SetActive(true);
-                break;
-            case LightColor.Yellow:
-                this._pedestrianRedLight.SetActive(true);
-                break;
-            case LightColor.Green:
-                this._pedestrianGreenLight.SetActive(true);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void TurnOffLights(LightColor color)
-    {
-        MeshRenderer[] lightMeshRenderers = this._lightColorToVehicleLightsMeshRendererMap[color];
-        foreach (MeshRenderer meshRenderers in lightMeshRenderers)
-        {
-            meshRenderers.material = this.GetLightMaterial(color, LightMaterialType.Normal);
-        }
-
-        switch (color)
-        {
-            case LightColor.Red:
-                this._pedestrianRedLight.SetActive(false);
-                break;
-            case LightColor.Green:
-                this._pedestrianGreenLight.SetActive(false);
-                break;
-            default:
-                break;
-        }
     }
 
     private void InitializeMaps()

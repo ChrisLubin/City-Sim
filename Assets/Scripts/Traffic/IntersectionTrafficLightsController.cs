@@ -68,10 +68,25 @@ public class IntersectionTrafficLightsController : MonoBehaviour
 
     private void ChangeLights(TrafficDirection trafficDirection, LightColor color)
     {
-        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-        foreach (var trafficLightToChange in trafficLightsToChange)
+        TrafficLightController[] vehicleTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        TrafficLightController[] pedestrianTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._eastWestTrafficLights : this._northSouthTrafficLights;
+
+        foreach (var vehicleTrafficLightToChange in vehicleTrafficLightsToChange)
         {
-            trafficLightToChange.ChangeLight(color);
+            vehicleTrafficLightToChange.ChangeVehicleLights(color);
+
+            if (color == LightColor.Green)
+                vehicleTrafficLightToChange.ChangePedestrianLight(LightColor.Green, true);
+            else if (color == LightColor.Red)
+                vehicleTrafficLightToChange.ChangePedestrianLight(LightColor.Red, true);
+        }
+
+        foreach (var pedestrianTrafficLightToChange in pedestrianTrafficLightsToChange)
+        {
+            if (color == LightColor.Green)
+                pedestrianTrafficLightToChange.ChangePedestrianLight(LightColor.Green, false);
+            else if (color == LightColor.Red)
+                pedestrianTrafficLightToChange.ChangePedestrianLight(LightColor.Red, false);
         }
 
         OnTrafficLightColorChange?.Invoke(trafficDirection, color == LightColor.Green);
@@ -79,19 +94,33 @@ public class IntersectionTrafficLightsController : MonoBehaviour
 
     private void StartFlashingPedestrianStopLights(TrafficDirection trafficDirection)
     {
-        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-        foreach (var trafficLightToChange in trafficLightsToChange)
+        TrafficLightController[] mainTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        TrafficLightController[] otherTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._eastWestTrafficLights : this._northSouthTrafficLights;
+
+        foreach (var trafficLightToChange in mainTrafficLightsToChange)
         {
-            trafficLightToChange.StartFlashingPedestrianStopLight();
+            trafficLightToChange.StartFlashingPedestrianStopLight(true);
+        }
+
+        foreach (var trafficLightToChange in otherTrafficLightsToChange)
+        {
+            trafficLightToChange.StartFlashingPedestrianStopLight(false);
         }
     }
 
     private void StopFlashingPedestrianStopLights(TrafficDirection trafficDirection)
     {
-        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-        foreach (var trafficLightToChange in trafficLightsToChange)
+        TrafficLightController[] mainTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        TrafficLightController[] otherTrafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._eastWestTrafficLights : this._northSouthTrafficLights;
+
+        foreach (var trafficLightToChange in mainTrafficLightsToChange)
         {
-            trafficLightToChange.StopFlashingPedestrianStopLight();
+            trafficLightToChange.StopFlashingPedestrianStopLight(true);
+        }
+
+        foreach (var trafficLightToChange in otherTrafficLightsToChange)
+        {
+            trafficLightToChange.StopFlashingPedestrianStopLight(false);
         }
     }
 
