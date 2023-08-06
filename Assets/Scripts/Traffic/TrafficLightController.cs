@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class TrafficLightController : MonoBehaviour
@@ -24,6 +25,9 @@ public class TrafficLightController : MonoBehaviour
     private IDictionary<LightColor, Material> _lightColorToNormalLightMaterialMap;
     private IDictionary<LightColor, Material> _lightColorToGlowLightMaterialMap;
 
+    private bool _isFlashingPedestrianStopLight = false;
+    private const float _FLASHING_PEDESTRIAN_LIGHT_TIME = 0.7f;
+
     private enum LightMaterialType
     {
         Normal,
@@ -41,13 +45,27 @@ public class TrafficLightController : MonoBehaviour
         this.TurnOnLights(color);
     }
 
-    public void TurnOnPedestrianStopLight()
+    public async void StartFlashingPedestrianStopLight()
     {
-        if (!this._pedestrianGreenLight.gameObject.activeSelf && this._pedestrianRedLight.activeSelf) { return; }
+        if (this._isFlashingPedestrianStopLight) { return; }
 
+        this._isFlashingPedestrianStopLight = true;
         this._pedestrianGreenLight.SetActive(false);
-        this._pedestrianRedLight.SetActive(true);
+
+        while (this._isFlashingPedestrianStopLight)
+        {
+            this._pedestrianRedLight.SetActive(true);
+            await UniTask.WaitForSeconds(_FLASHING_PEDESTRIAN_LIGHT_TIME);
+
+            if (!this._isFlashingPedestrianStopLight)
+                break;
+
+            this._pedestrianRedLight.SetActive(false);
+            await UniTask.WaitForSeconds(_FLASHING_PEDESTRIAN_LIGHT_TIME);
+        }
     }
+
+    public void StopFlashingPedestrianStopLight() => this._isFlashingPedestrianStopLight = false;
 
     private Material GetLightMaterial(LightColor color, LightMaterialType type)
     {

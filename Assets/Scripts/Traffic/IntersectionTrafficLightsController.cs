@@ -54,7 +54,7 @@ public class IntersectionTrafficLightsController : MonoBehaviour
             TrafficLightController[] greenTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
             foreach (var greenTrafficLight in greenTrafficLights)
             {
-                greenTrafficLight.TurnOnPedestrianStopLight();
+                greenTrafficLight.StartFlashingPedestrianStopLight();
             }
         }
         if (this._timeSinceLastChange >= this._timeoutToChangeDirection)
@@ -76,6 +76,7 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         await UniTask.WaitForSeconds(3f);
         foreach (var greenTrafficLight in greenTrafficLights)
         {
+            greenTrafficLight.StopFlashingPedestrianStopLight();
             greenTrafficLight.ChangeLight(LightColor.Red);
         }
         await UniTask.WaitForSeconds(3f);
