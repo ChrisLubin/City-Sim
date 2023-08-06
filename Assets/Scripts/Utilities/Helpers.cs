@@ -36,4 +36,65 @@ public static class Helpers
 
         return list.ToArray<T>();
     }
+
+    public static Vector3 GetPointInDirection(this Vector3 startingPoint, Direction[] directions, float moveInterval = 5f)
+    {
+        Vector3 newPoint = startingPoint;
+
+        foreach (Direction direction in directions)
+        {
+            if (direction == Direction.North)
+            {
+                newPoint.z -= moveInterval;
+            }
+            else if (direction == Direction.East)
+            {
+                newPoint.x -= moveInterval;
+            }
+            else if (direction == Direction.South)
+            {
+                newPoint.z += moveInterval;
+            }
+            else if (direction == Direction.West)
+            {
+                newPoint.x += moveInterval;
+            }
+        }
+
+        return newPoint;
+    }
+
+    public static Direction GetOppositeDirection(this Direction direction)
+    {
+        Direction oppositeDirection = Direction.None;
+
+        switch (direction)
+        {
+            case Direction.North:
+                oppositeDirection = Direction.South;
+                break;
+            case Direction.East:
+                oppositeDirection = Direction.West;
+                break;
+            case Direction.South:
+                oppositeDirection = Direction.North;
+                break;
+            case Direction.West:
+                oppositeDirection = Direction.East;
+                break;
+            default:
+                break;
+        }
+
+        return oppositeDirection;
+    }
+}
+
+public enum Direction
+{
+    North,
+    East,
+    South,
+    West,
+    None
 }

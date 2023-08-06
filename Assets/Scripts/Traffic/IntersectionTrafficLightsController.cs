@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -15,31 +16,19 @@ public class IntersectionTrafficLightsController : MonoBehaviour
     private const float _MAX_CHANGE_DIRECTION_TIMEOUT = 17f;
     private const float _TIMEOUT_TO_STOP_PEDESTRIAN_TRAFFIC = 3f;
 
-    private enum TrafficDirection
-    {
-        NorthSouth,
-        EastWest,
-    }
+    public event Action<TrafficDirection, bool> OnTrafficLightColorChange;
 
     private void Awake()
     {
-        this._currentTrafficDirection = Random.value < 0.5f ? TrafficDirection.NorthSouth : TrafficDirection.EastWest;
+        this._currentTrafficDirection = UnityEngine.Random.value < 0.5f ? TrafficDirection.NorthSouth : TrafficDirection.EastWest;
         this.RandomizeTrafficChangeTimeout();
     }
 
     private void Start()
     {
-        TrafficLightController[] greenTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-        TrafficLightController[] redTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._eastWestTrafficLights : this._northSouthTrafficLights;
-
-        foreach (var greenTrafficLight in greenTrafficLights)
-        {
-            greenTrafficLight.ChangeLight(LightColor.Green);
-        }
-        foreach (var redTrafficLight in redTrafficLights)
-        {
-            redTrafficLight.ChangeLight(LightColor.Red);
-        }
+        TrafficDirection redTrafficDirection = this._currentTrafficDirection == TrafficDirection.NorthSouth ? TrafficDirection.EastWest : TrafficDirection.NorthSouth;
+        this.ChangeLights(this._currentTrafficDirection, LightColor.Green);
+        this.ChangeLights(redTrafficDirection, LightColor.Red);
     }
 
     private void Update()
@@ -51,11 +40,7 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         // Turn on pedestrian stop light before light turns yellow
         if (this._timeoutToChangeDirection - this._timeSinceLastChange <= _TIMEOUT_TO_STOP_PEDESTRIAN_TRAFFIC)
         {
-            TrafficLightController[] greenTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-            foreach (var greenTrafficLight in greenTrafficLights)
-            {
-                greenTrafficLight.StartFlashingPedestrianStopLight();
-            }
+            this.StartFlashingPedestrianStopLights(this._currentTrafficDirection);
         }
         if (this._timeSinceLastChange >= this._timeoutToChangeDirection)
         {
@@ -66,24 +51,14 @@ public class IntersectionTrafficLightsController : MonoBehaviour
     private async void TransitionToOtherDirection()
     {
         this._isChangingTrafficDirection = true;
-        TrafficLightController[] greenTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
-        TrafficLightController[] redTrafficLights = this._currentTrafficDirection == TrafficDirection.NorthSouth ? this._eastWestTrafficLights : this._northSouthTrafficLights;
+        TrafficDirection oppositeTrafficDirection = this._currentTrafficDirection == TrafficDirection.NorthSouth ? TrafficDirection.EastWest : TrafficDirection.NorthSouth;
 
-        foreach (var greenTrafficLight in greenTrafficLights)
-        {
-            greenTrafficLight.ChangeLight(LightColor.Yellow);
-        }
+        this.ChangeLights(this._currentTrafficDirection, LightColor.Yellow);
         await UniTask.WaitForSeconds(3f);
-        foreach (var greenTrafficLight in greenTrafficLights)
-        {
-            greenTrafficLight.StopFlashingPedestrianStopLight();
-            greenTrafficLight.ChangeLight(LightColor.Red);
-        }
+        this.StopFlashingPedestrianStopLights(this._currentTrafficDirection);
+        this.ChangeLights(this._currentTrafficDirection, LightColor.Red);
         await UniTask.WaitForSeconds(3f);
-        foreach (var redTrafficLight in redTrafficLights)
-        {
-            redTrafficLight.ChangeLight(LightColor.Green);
-        }
+        this.ChangeLights(oppositeTrafficDirection, LightColor.Green);
 
         this._currentTrafficDirection = this._currentTrafficDirection == TrafficDirection.NorthSouth ? TrafficDirection.EastWest : TrafficDirection.NorthSouth;
         this._isChangingTrafficDirection = false;
@@ -91,5 +66,40 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         this.RandomizeTrafficChangeTimeout();
     }
 
-    private void RandomizeTrafficChangeTimeout() => this._timeoutToChangeDirection = Random.Range(_MIN_CHANGE_DIRECTION_TIMEOUT, _MAX_CHANGE_DIRECTION_TIMEOUT);
+    private void ChangeLights(TrafficDirection trafficDirection, LightColor color)
+    {
+        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        foreach (var trafficLightToChange in trafficLightsToChange)
+        {
+            trafficLightToChange.ChangeLight(color);
+        }
+
+        OnTrafficLightColorChange?.Invoke(trafficDirection, color == LightColor.Green);
+    }
+
+    private void StartFlashingPedestrianStopLights(TrafficDirection trafficDirection)
+    {
+        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        foreach (var trafficLightToChange in trafficLightsToChange)
+        {
+            trafficLightToChange.StartFlashingPedestrianStopLight();
+        }
+    }
+
+    private void StopFlashingPedestrianStopLights(TrafficDirection trafficDirection)
+    {
+        TrafficLightController[] trafficLightsToChange = trafficDirection == TrafficDirection.NorthSouth ? this._northSouthTrafficLights : this._eastWestTrafficLights;
+        foreach (var trafficLightToChange in trafficLightsToChange)
+        {
+            trafficLightToChange.StopFlashingPedestrianStopLight();
+        }
+    }
+
+    private void RandomizeTrafficChangeTimeout() => this._timeoutToChangeDirection = UnityEngine.Random.Range(_MIN_CHANGE_DIRECTION_TIMEOUT, _MAX_CHANGE_DIRECTION_TIMEOUT);
+}
+
+public enum TrafficDirection
+{
+    NorthSouth,
+    EastWest,
 }

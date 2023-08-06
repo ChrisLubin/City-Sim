@@ -4,6 +4,7 @@ public static class Constants
     {
         public const string Interactable = "Interactable";
         public const string Player = "Player";
+        public const string Vehicle = "Vehicle";
     }
 
     public static class TagNames

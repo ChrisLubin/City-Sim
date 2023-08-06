@@ -5,7 +5,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(VehicleAiPathController))]
 [RequireComponent(typeof(Seeker))]
-public class VehicleAiMovementController : NetworkBehaviour
+public class VehicleAiMovementController : NetworkBehaviour, IAiMovementController
 {
     private VehicleMovementController _movementController;
     private VehicleSeatController _seatController;
@@ -21,6 +21,7 @@ public class VehicleAiMovementController : NetworkBehaviour
 
     private Vector3 _target = Vector3.zero;
     private bool _hasTarget { get => this._target != Vector3.zero; }
+    private bool _hasRightOfWay = true;
 
     void OnDrawGizmosSelected()
     {
@@ -69,6 +70,7 @@ public class VehicleAiMovementController : NetworkBehaviour
     }
 
     private void OnTargetChange(Vector3 nextTarget) => this._target = nextTarget;
+    public void SetHasRightOfWay(bool hasRightOfWay) => this._hasRightOfWay = hasRightOfWay;
 
     void Update()
     {
@@ -76,9 +78,9 @@ public class VehicleAiMovementController : NetworkBehaviour
 
         float distance = Vector3.Distance(new(transform.position.x, 0, transform.position.z), new(this._target.x, 0, this._target.z));
 
-        // Stop moving if we are near the target or about to hit something
+        // Stop moving if we are near the target, about to hit something, or don't have the right of way
         RaycastHit[] objectsInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f);
-        if (distance < 3 || objectsInFront.Any(obj => obj.collider.gameObject != gameObject))
+        if (!this._hasRightOfWay || distance < 3 || objectsInFront.Any(obj => obj.collider.gameObject != gameObject))
         {
             this._movementController.DecelerateCar();
             return;
