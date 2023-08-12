@@ -88,6 +88,11 @@ public static class Helpers
 
         return oppositeDirection;
     }
+
+    public static bool IsNextDirectionLeftTurn(this Direction direction, Direction nextDirection)
+    {
+        return direction == Direction.North && nextDirection == Direction.West || direction == Direction.East && nextDirection == Direction.North || direction == Direction.South && nextDirection == Direction.East || direction == Direction.West && nextDirection == Direction.South;
+    }
 }
 
 public enum Direction

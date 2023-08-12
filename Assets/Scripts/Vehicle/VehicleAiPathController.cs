@@ -34,6 +34,10 @@ public class VehicleAiPathController : NetworkBehaviour
     private static Vector3[] _ALL_SOUTH_POINTS;
     private static Vector3[] _ALL_WEST_POINTS;
 
+    private Direction _upcomingDirection;
+    private const float _UPCOMING_DIRECTION_NOTICE_DISTANCE = 25f;
+    public event Action<Direction> OnUpcomingDirectionChange;
+
     private static IDictionary<Direction, string> _DIRECTION_TO_GRAPH_NAME_MAP = new Dictionary<Direction, string>()
     {
         { Direction.None, _ALL_DIRECTIONS_GRAPH_NAME },
@@ -42,18 +46,6 @@ public class VehicleAiPathController : NetworkBehaviour
         { Direction.South, _SOUTH_DIRECTION_GRAPH_NAME },
         { Direction.West, _WEST_DIRECTION_GRAPH_NAME },
     };
-
-    private struct DirectionWithTurningPoint
-    {
-        public Direction Direction { get; private set; }
-        public Vector3 TurningPoint { get; private set; }
-
-        public DirectionWithTurningPoint(Direction direction, Vector3 turningPoint)
-        {
-            this.Direction = direction;
-            this.TurningPoint = turningPoint;
-        }
-    }
 
     private void Awake()
     {
@@ -77,22 +69,23 @@ public class VehicleAiPathController : NetworkBehaviour
 
     private async void Start()
     {
-        this._target = GameObject.FindGameObjectWithTag("TestTarget").transform;
+        this.SetUpcomingDirection(Direction.None);
+
         if (this._target == null)
         {
-            Destroy(gameObject);
+            this._target = GameObject.FindGameObjectWithTag("TestTarget").transform;
+
         }
-        else
-        {
-            await this.GetWholeProperPath();
-            this.FixStartingPositionAndRotation();
-        }
+
+        await this.GetWholeProperPath();
+        this.FixStartingPositionAndRotation();
     }
 
     private void Update()
     {
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || this._target == null || this._currentDirectionPath == null) { return; }
 
+        this.UpdateUpcomingDirection();
         float distanceToNextWaypoint;
 
         // Check in a loop if we are close enough to the current waypoint to switch to the next one
@@ -114,6 +107,20 @@ public class VehicleAiPathController : NetworkBehaviour
         }
     }
 
+    private void UpdateUpcomingDirection()
+    {
+        bool isOnLastStraightaway = this._directionSwitchCount == this._directionsWithTurningPoints.Count() - 1;
+
+        if (isOnLastStraightaway) { return; }
+
+        Vector3 nextTurningPoint = this._directionsWithTurningPoints[this._directionSwitchCount].TurningPoint;
+        float distanceToNextTurningPoint = Vector3.Distance(transform.position, nextTurningPoint);
+        Direction nextDirection = this._directionsWithTurningPoints[this._directionSwitchCount + 1].Direction;
+
+        if (distanceToNextTurningPoint <= _UPCOMING_DIRECTION_NOTICE_DISTANCE)
+            this.SetUpcomingDirection(nextDirection);
+    }
+
     private async UniTask<Path> GetWholePathWithoutProperLanes()
     {
         this._seeker.drawGizmos = false;
@@ -132,6 +139,7 @@ public class VehicleAiPathController : NetworkBehaviour
         this._directionsWithTurningPoints = this.GetDirectionsWithTurningPointsForPath(pathWithoutProperLanes);
         bool isOnlyOneDirection = this._directionsWithTurningPoints.Count() == 1;
         await this.UpdatePath(transform.position, !isOnlyOneDirection ? this._directionsWithTurningPoints.First().TurningPoint : this._target.position, this._directionsWithTurningPoints.First().Direction);
+        this.SetUpcomingDirection(this._directionsWithTurningPoints.First().Direction); // SEE IF THIS WORKS WHEN THERES ONLY ONE DIRECTION (STRAIGHT LINE TO TARGET)
     }
 
     private async UniTask UpdatePath(Vector3 startPoint, Vector3 endPoint, Direction direction)
@@ -153,6 +161,7 @@ public class VehicleAiPathController : NetworkBehaviour
             this._currentWaypoint = 0;
             this._currentDirectionPath = null;
             this._directionSwitchCount = 0;
+            this.SetUpcomingDirection(Direction.None);
             return;
         }
 
@@ -167,6 +176,8 @@ public class VehicleAiPathController : NetworkBehaviour
         Vector3 startPoint = isOnLastStraightaway ? transform.position : this._directionsWithTurningPoints[this._directionSwitchCount].TurningPoint;
         startPoint = startPoint.GetPointInDirection(new[] { previousDirection, nextDirection });
         Vector3 endPoint = isOnLastStraightaway ? this._target.position : this._directionsWithTurningPoints[this._directionSwitchCount + 1].TurningPoint;
+
+        this.SetUpcomingDirection(nextDirection);
 
         await this.UpdatePath(startPoint, endPoint, nextDirection);
         this._directionSwitchCount++;
@@ -357,5 +368,25 @@ public class VehicleAiPathController : NetworkBehaviour
         if (firstPathDirection == directionCurrentlyFacing) { return; }
         transform.position = this._currentDirectionPath.vectorPath[0];
         transform.LookAt(transform.position.GetPointInDirection(new[] { firstPathDirection }));
+    }
+
+    private void SetUpcomingDirection(Direction direction)
+    {
+        if (this._upcomingDirection == direction) { return; }
+
+        this._upcomingDirection = direction;
+        OnUpcomingDirectionChange?.Invoke(this._upcomingDirection);
+    }
+
+    private struct DirectionWithTurningPoint
+    {
+        public Direction Direction { get; private set; }
+        public Vector3 TurningPoint { get; private set; }
+
+        public DirectionWithTurningPoint(Direction direction, Vector3 turningPoint)
+        {
+            this.Direction = direction;
+            this.TurningPoint = turningPoint;
+        }
     }
 }

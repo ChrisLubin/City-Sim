@@ -21,7 +21,12 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
 
     private Vector3 _target = Vector3.zero;
     private bool _hasTarget { get => this._target != Vector3.zero; }
-    private bool _hasRightOfWay = true;
+    private bool _hasRightOfWay = false;
+    private bool _isAtIntersection = false;
+    private bool _isAtRedLightOrStopSign = false;
+
+    private Direction _upcomingDirection;
+    public Direction UpcomingDirection { get => this._upcomingDirection; }
 
     void OnDrawGizmosSelected()
     {
@@ -61,26 +66,30 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
         this._seatController = GetComponent<VehicleSeatController>();
         this._pathController = GetComponent<VehicleAiPathController>();
         this._pathController.OnNextNodeChange += this.OnTargetChange;
+        this._pathController.OnUpcomingDirectionChange += this.OnUpcomingDirectionChange;
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
         this._pathController.OnNextNodeChange -= this.OnTargetChange;
+        this._pathController.OnUpcomingDirectionChange -= this.OnUpcomingDirectionChange;
     }
 
     private void OnTargetChange(Vector3 nextTarget) => this._target = nextTarget;
+    public void SetIsAtIntersection(bool isAtIntersection) => this._isAtIntersection = isAtIntersection;
     public void SetHasRightOfWay(bool hasRightOfWay) => this._hasRightOfWay = hasRightOfWay;
+    public void SetIsAtRedLightOrStopSign(bool isAtRedLightOrStopSign) => this._isAtRedLightOrStopSign = isAtRedLightOrStopSign;
+    private void OnUpcomingDirectionChange(Direction direction) => this._upcomingDirection = direction;
 
     void Update()
     {
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
-        float distance = Vector3.Distance(new(transform.position.x, 0, transform.position.z), new(this._target.x, 0, this._target.z));
+        bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Any(obj => obj.collider.gameObject != gameObject);
+        bool hasPlayerInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Player)).Count() > 0;
 
-        // Stop moving if we are near the target, about to hit something, or don't have the right of way
-        RaycastHit[] objectsInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f);
-        if (!this._hasRightOfWay || distance < 3 || objectsInFront.Any(obj => obj.collider.gameObject != gameObject))
+        if (this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay) || (hasVehicleInFront && !this._isAtIntersection) || (hasPlayerInFront && !this._isAtIntersection))
         {
             this._movementController.DecelerateCar();
             return;
