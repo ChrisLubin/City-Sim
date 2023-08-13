@@ -1,4 +1,4 @@
 public interface IInteractable
 {
-    public void DoInteract(PlayerInteractorController player);
+    public void DoInteract(CharacterInteractorController character);
 }

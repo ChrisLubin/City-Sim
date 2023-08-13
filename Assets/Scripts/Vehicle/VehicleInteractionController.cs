@@ -21,16 +21,16 @@ public class VehicleInteractionController : NetworkBehaviourWithLogger<VehicleIn
         {
             this._logger.Log("Local player is exiting vehicle");
             this.OnInteraction?.Invoke(InteractionType.ExitVehicle);
-            PlayerManager.LocalPlayer.GetComponent<PlayerInteractorController>().DidInteraction(InteractionType.ExitVehicle);
+            PlayerManager.LocalPlayer.GetComponent<CharacterInteractorController>().DidInteraction(InteractionType.ExitVehicle);
         }
     }
 
-    public void DoInteract(PlayerInteractorController player)
+    public void DoInteract(CharacterInteractorController character)
     {
         if (!this.IsOwner || this._seatController.HasPlayerInDriverSeat) { return; }
 
         this._logger.Log("Local player is entering vehicle");
         this.OnInteraction?.Invoke(InteractionType.EnterVehicle);
-        player.DidInteraction(InteractionType.EnterVehicle);
+        character.DidInteraction(InteractionType.EnterVehicle);
     }
 }

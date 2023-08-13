@@ -1617,8 +1617,8 @@ GameObject:
   - component: {fileID: 8445652755113444497}
   - component: {fileID: 4411424584783822579}
   - component: {fileID: 4783701330304725084}
-  - component: {fileID: 2350055487651450520}
-  - component: {fileID: 3551050805749498108}
+  - component: {fileID: 8437515711032649477}
+  - component: {fileID: 8978685156229914649}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -1844,6 +1844,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9738a9e229079bc46b8f8499ed74f91c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _orientation: {fileID: 4691069568663642}
+  IsNPC: 0
+  IsTryingToJump: 0
+  IsTryingToSprint: 0
+  IsTryingToStayCrouched: 0
+  IsTryingToStartCrouch: 0
+  IsTryingToEndCrouch: 0
+  IsTryingToMoveForward: 0
+  HorizontalInput: 0
+  VerticalInput: 0
   _walkSpeed: 3
   _sprintSpeed: 6
   _groundDrag: 4
@@ -1852,31 +1862,16 @@ MonoBehaviour:
   _airMultiplier: 0.4
   _crouchSpeed: 1.5
   _crouchYScale: 0.5
-  _jumpKey: 32
-  _sprintKey: 304
-  _crouchKey: 306
   _playerHeight: 2
   _whatIsGround:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 0
   _maxSlopeAngle: 40
-  _orientation: {fileID: 4691069568663642}
   _state: 0
---- !u!114 &2350055487651450520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1478715308122502}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e375441e085f6c4daa4c079031a9a98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 8211209269559267855}
-  _maxInteractDistance: 2
---- !u!114 &3551050805749498108
+  _jumpKey: 32
+  _sprintKey: 304
+  _crouchKey: 306
+--- !u!114 &8437515711032649477
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1888,6 +1883,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1418ae365c3f2b144aac2cbf635e8288, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8978685156229914649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1478715308122502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d527cbc1d3648b840a1fadc44429898d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _facePoint: {fileID: 795648243527321566}
+  _maxInteractDistance: 2
 --- !u!1 &1491129765998800
 GameObject:
   m_ObjectHideFlags: 0
