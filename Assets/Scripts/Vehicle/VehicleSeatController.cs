@@ -72,7 +72,7 @@ public class VehicleSeatController : NetworkBehaviourWithLogger<VehicleSeatContr
 
     private void OnDriverSeatChange(ulong previousDriverClientId, ulong currentDriverClientId)
     {
-        if (!this.IsHost) { return; }
+        if (!this.IsHost || this.HasAiInDriverSeat) { return; }
 
         bool isEnteringDriverSeat = currentDriverClientId != _EMPTY_DRIVER_SEAT_CLIENT_ID;
         ulong playerClientId = isEnteringDriverSeat ? currentDriverClientId : previousDriverClientId;
