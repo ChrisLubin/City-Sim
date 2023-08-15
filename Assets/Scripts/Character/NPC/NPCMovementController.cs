@@ -6,7 +6,6 @@ public class NPCMovementController : CharacterMovementController
 
     private bool _hasTarget { get => this._target != Vector3.zero; }
     private Vector3 _target = Vector3.zero;
-    private Vector3 _previousPosition;
 
     private void Awake()
     {
@@ -16,7 +15,6 @@ public class NPCMovementController : CharacterMovementController
         this._pathController.OnNextNodeChange += this.OnTargetChange;
 
         this.IsNPC = true;
-        this._previousPosition = transform.position;
     }
 
     private void Start() => base.OnStart();
@@ -27,11 +25,8 @@ public class NPCMovementController : CharacterMovementController
 
         transform.LookAt(this._target);
         this.IsTryingToMoveForward = true;
-        this.IsTryingToJump = this._previousPosition.IsEqual(transform.position);
 
         base.OnUpdate();
-
-        this._previousPosition = transform.position;
     }
 
     private void OnTargetChange(Vector3 nextTarget) => this._target = nextTarget;
