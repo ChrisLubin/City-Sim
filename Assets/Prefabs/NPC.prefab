@@ -1910,8 +1910,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fc7f3f80753332479ff28a9867bd455, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _waypointEnteredDistance: 3
-  _target: {fileID: 0}
+  _waypointEnteredDistance: 1
+  _startingDestination: {fileID: 0}
 --- !u!114 &2480713008476277730
 MonoBehaviour:
   m_ObjectHideFlags: 0

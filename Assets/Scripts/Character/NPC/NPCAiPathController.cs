@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Pathfinding;
 using Unity.Netcode;
 using UnityEngine;
+using System.Linq;
 
 [RequireComponent(typeof(NPCMovementController))]
 [RequireComponent(typeof(Seeker))]
@@ -13,27 +14,39 @@ public class NPCAiPathController : NetworkBehaviour
     private Path _path = null;
     private int _currentWaypoint = 0;
     [SerializeField] private float _waypointEnteredDistance = 3;
-    [SerializeField] private Transform _target;
+
+    [SerializeField] private Transform _startingDestination;
+    private Vector3 _currentDestination = Vector3.zero;
 
     public event Action<Vector3> OnNextNodeChange;
 
     private const string _PEDESTRIAN_GRAPH_NAME = "Pedestrian Graph";
+    private static Vector3[] _ALL_PEDESTRIAN_POINTS;
 
-    private void Awake() => this._seeker = GetComponent<Seeker>();
+    private void Awake()
+    {
+        this._seeker = GetComponent<Seeker>();
+        if (_ALL_PEDESTRIAN_POINTS == null)
+            _ALL_PEDESTRIAN_POINTS = GameObject.FindGameObjectsWithTag(Constants.TagNames.PedestrianPoints).Select(obj => obj.transform.position).ToArray();
+    }
 
     private async UniTask Start()
     {
-        if (this._target == null)
+        if (this._startingDestination == null)
         {
-            this.enabled = false;
-            return;
+            int randomTargetIndex = UnityEngine.Random.Range(0, _ALL_PEDESTRIAN_POINTS.Length);
+            this._currentDestination = _ALL_PEDESTRIAN_POINTS[randomTargetIndex];
+        }
+        else
+        {
+            this._currentDestination = this._startingDestination.position;
         }
 
         this._currentWaypoint = 0;
         this._path = null;
         this._seeker.drawGizmos = false;
         this._seeker.detailedGizmos = false;
-        Path path = this._seeker.StartPath(transform.position, this._target.position, (Path p) => { }, GraphMask.FromGraphName(_PEDESTRIAN_GRAPH_NAME));
+        Path path = this._seeker.StartPath(transform.position, this._currentDestination, (Path p) => { }, GraphMask.FromGraphName(_PEDESTRIAN_GRAPH_NAME));
         await path.WaitForPath();
         this._seeker.drawGizmos = true;
         this._seeker.detailedGizmos = true;
@@ -42,7 +55,7 @@ public class NPCAiPathController : NetworkBehaviour
 
     private void Update()
     {
-        if (!this.IsOwner || this._target == null || this._path == null) { return; }
+        if (!this.IsOwner || this._path == null) { return; }
 
         float distanceToNextWaypoint;
 
@@ -65,11 +78,15 @@ public class NPCAiPathController : NetworkBehaviour
         }
     }
 
-    private void OnLastWaypointReached()
+    private async void OnLastWaypointReached()
     {
         this._currentWaypoint = 0;
         this._path = null;
-        OnNextNodeChange?.Invoke(Vector3.zero);
-        Destroy(gameObject);
+        int randomTargetIndex = UnityEngine.Random.Range(0, _ALL_PEDESTRIAN_POINTS.Length);
+        this._currentDestination = _ALL_PEDESTRIAN_POINTS[randomTargetIndex];
+
+        Path path = this._seeker.StartPath(transform.position, this._currentDestination, (Path p) => { }, GraphMask.FromGraphName(_PEDESTRIAN_GRAPH_NAME));
+        await path.WaitForPath();
+        this._path = path;
     }
 }

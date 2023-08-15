@@ -14,5 +14,6 @@ public static class Constants
         public const string EastDirection = "AiVehicleNavigationEastDirection";
         public const string SouthDirection = "AiVehicleNavigationSouthDirection";
         public const string WestDirection = "AiVehicleNavigationWestDirection";
+        public const string PedestrianPoints = "AiPedestrianNavigation";
     }
 }
