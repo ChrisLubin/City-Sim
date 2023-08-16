@@ -7,6 +7,7 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
 {
     [SerializeField] Transform _playerPrefab;
     [SerializeField] Transform _playerSpawnArea;
+    [SerializeField] Transform _playerContainer;
     [SerializeField] float _playerSpawnMaxDistance = 9f;
 
     public static PlayerController LocalPlayer { get; private set; }
@@ -41,6 +42,8 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
             case GameState.GameStarted:
                 const int hostId = 0;
                 this.SpawnPlayer(hostId);
+                break;
+            default:
                 break;
         }
     }
@@ -83,7 +86,9 @@ public class PlayerManager : NetworkedStaticInstanceWithLogger<PlayerManager>
 
         Vector3 randomSpawnPoint = new(UnityEngine.Random.Range(this._playerSpawnArea.position.x - this._playerSpawnMaxDistance, this._playerSpawnArea.position.x + this._playerSpawnMaxDistance), 0, UnityEngine.Random.Range(this._playerSpawnArea.position.z - this._playerSpawnMaxDistance, this._playerSpawnArea.position.z + this._playerSpawnMaxDistance));
         Transform playerTransform = Instantiate(this._playerPrefab, randomSpawnPoint, this._playerSpawnArea.rotation);
-        playerTransform.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+        NetworkObject playerNetworkObject = playerTransform.GetComponent<NetworkObject>();
+        playerNetworkObject.SpawnWithOwnership(clientId);
+        playerNetworkObject.TrySetParent(this._playerContainer);
         this._logger.Log($"Spawned player for {MultiplayerSystem.Instance.GetPlayerUsername(clientId)}");
     }
 
