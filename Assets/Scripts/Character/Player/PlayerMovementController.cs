@@ -4,7 +4,7 @@ public class PlayerMovementController : CharacterMovementController
 {
     private CharacterInteractorController _interactorController;
 
-    private BoxCollider _collider;
+    private Collider _collider;
 
     [Header("Keybinds")]
     [SerializeField] private KeyCode _jumpKey = KeyCode.Space;
@@ -15,7 +15,7 @@ public class PlayerMovementController : CharacterMovementController
     {
         base.OnAwake();
         this.IsNPC = false;
-        this._collider = GetComponent<BoxCollider>();
+        this._collider = GetComponent<Collider>();
         this._interactorController = GetComponent<CharacterInteractorController>();
         this._interactorController.OnDidInteraction += this.OnPlayerDidInteraction;
     }

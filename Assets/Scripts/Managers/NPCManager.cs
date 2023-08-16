@@ -6,6 +6,7 @@ public class NPCManager : NetworkedStaticInstanceWithLogger<NPCManager>
 {
     [SerializeField] Transform _NPCPrefab;
     [SerializeField] Transform _NPCContainer;
+    [SerializeField] int _npcSpawnCount = 20;
 
     private const string _PEDESTRIAN_GRAPH_NAME = "Pedestrian Graph";
     private static Vector3[] _ALL_PEDESTRIAN_POINTS;
@@ -32,7 +33,7 @@ public class NPCManager : NetworkedStaticInstanceWithLogger<NPCManager>
         switch (state)
         {
             case GameState.GameStarted:
-                this.SpawnNPCs(10);
+                this.SpawnNPCs(this._npcSpawnCount);
                 break;
             default:
                 break;
