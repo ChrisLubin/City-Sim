@@ -1,8 +1,9 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Unity.Netcode;
 using UnityEngine;
 
-public class IntersectionTrafficLightsController : MonoBehaviour
+public class IntersectionTrafficLightsController : NetworkBehaviour
 {
     [SerializeField] private TrafficLightController[] _northSouthTrafficLights;
     [SerializeField] private TrafficLightController[] _eastWestTrafficLights;
@@ -11,6 +12,7 @@ public class IntersectionTrafficLightsController : MonoBehaviour
     private bool _isChangingTrafficDirection = false;
     private float _timeSinceLastChange = 0f;
     private float _timeoutToChangeDirection;
+    private NetworkVariable<IntersectionState> _state = new();
 
     private const float _MIN_CHANGE_DIRECTION_TIMEOUT = 10f;
     private const float _MAX_CHANGE_DIRECTION_TIMEOUT = 17f;
@@ -20,12 +22,33 @@ public class IntersectionTrafficLightsController : MonoBehaviour
 
     private void Awake()
     {
-        this._currentTrafficDirection = UnityEngine.Random.value < 0.5f ? TrafficDirection.NorthSouth : TrafficDirection.EastWest;
-        this.RandomizeTrafficChangeTimeout();
+        this._state.OnValueChanged += this.OnStateChange;
     }
 
-    private void Start()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
+        this._state.OnValueChanged -= this.OnStateChange;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (!this.IsHost)
+        {
+            this.ChangeLights(TrafficDirection.NorthSouth, this._state.Value.NorthSouthLightColor);
+            this.ChangeLights(TrafficDirection.EastWest, this._state.Value.EastWestLightColor);
+
+            if (this._state.Value.IsNorthSouthPedestrianLightFlashing)
+                this.StartFlashingPedestrianStopLights(TrafficDirection.NorthSouth);
+            if (this._state.Value.IsEastWestPedestrianLightFlashing)
+                this.StartFlashingPedestrianStopLights(TrafficDirection.EastWest);
+            return;
+        }
+
+        this._currentTrafficDirection = UnityEngine.Random.value < 0.5f ? TrafficDirection.NorthSouth : TrafficDirection.EastWest;
+        this.RandomizeTrafficChangeTimeout();
+
         TrafficDirection redTrafficDirection = this._currentTrafficDirection == TrafficDirection.NorthSouth ? TrafficDirection.EastWest : TrafficDirection.NorthSouth;
         this.ChangeLights(this._currentTrafficDirection, LightColor.Green);
         this.ChangeLights(redTrafficDirection, LightColor.Red);
@@ -33,7 +56,7 @@ public class IntersectionTrafficLightsController : MonoBehaviour
 
     private void Update()
     {
-        if (this._isChangingTrafficDirection) { return; }
+        if (this._isChangingTrafficDirection || !this.IsHost) { return; }
 
         this._timeSinceLastChange += Time.deltaTime;
 
@@ -45,6 +68,32 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         if (this._timeSinceLastChange >= this._timeoutToChangeDirection)
         {
             this.TransitionToOtherDirection();
+        }
+    }
+
+    private void OnStateChange(IntersectionState oldState, IntersectionState newState)
+    {
+        if (this.IsHost) { return; }
+
+        bool didNorthSouthPedLightFlashChange = oldState.IsNorthSouthPedestrianLightFlashing != newState.IsNorthSouthPedestrianLightFlashing;
+        bool didEastWestPedLightFlashChange = oldState.IsEastWestPedestrianLightFlashing != newState.IsEastWestPedestrianLightFlashing;
+
+        this.ChangeLights(TrafficDirection.NorthSouth, newState.NorthSouthLightColor);
+        this.ChangeLights(TrafficDirection.EastWest, newState.EastWestLightColor);
+
+        if (didNorthSouthPedLightFlashChange)
+        {
+            if (newState.IsNorthSouthPedestrianLightFlashing)
+                this.StartFlashingPedestrianStopLights(TrafficDirection.NorthSouth);
+            else
+                this.StopFlashingPedestrianStopLights(TrafficDirection.NorthSouth);
+        }
+        if (didEastWestPedLightFlashChange)
+        {
+            if (newState.IsEastWestPedestrianLightFlashing)
+                this.StartFlashingPedestrianStopLights(TrafficDirection.EastWest);
+            else
+                this.StopFlashingPedestrianStopLights(TrafficDirection.EastWest);
         }
     }
 
@@ -90,6 +139,17 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         }
 
         OnTrafficLightColorChange?.Invoke(trafficDirection, color == LightColor.Green);
+
+        if (!this.IsHost) { return; }
+
+        IntersectionState updatedState = this._state.Value;
+
+        if (trafficDirection == TrafficDirection.NorthSouth)
+            updatedState.NorthSouthLightColor = color;
+        else
+            updatedState.EastWestLightColor = color;
+
+        this._state.Value = updatedState;
     }
 
     private void StartFlashingPedestrianStopLights(TrafficDirection trafficDirection)
@@ -106,6 +166,17 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         {
             trafficLightToChange.StartFlashingPedestrianStopLight(false);
         }
+
+        if (!this.IsHost) { return; }
+
+        IntersectionState updatedState = this._state.Value;
+
+        if (trafficDirection == TrafficDirection.NorthSouth)
+            updatedState.IsNorthSouthPedestrianLightFlashing = true;
+        else
+            updatedState.IsEastWestPedestrianLightFlashing = true;
+
+        this._state.Value = updatedState;
     }
 
     private void StopFlashingPedestrianStopLights(TrafficDirection trafficDirection)
@@ -122,6 +193,17 @@ public class IntersectionTrafficLightsController : MonoBehaviour
         {
             trafficLightToChange.StopFlashingPedestrianStopLight(false);
         }
+
+        if (!this.IsHost) { return; }
+
+        IntersectionState updatedState = this._state.Value;
+
+        if (trafficDirection == TrafficDirection.NorthSouth)
+            updatedState.IsNorthSouthPedestrianLightFlashing = false;
+        else
+            updatedState.IsEastWestPedestrianLightFlashing = false;
+
+        this._state.Value = updatedState;
     }
 
     private void RandomizeTrafficChangeTimeout() => this._timeoutToChangeDirection = UnityEngine.Random.Range(_MIN_CHANGE_DIRECTION_TIMEOUT, _MAX_CHANGE_DIRECTION_TIMEOUT);
@@ -131,4 +213,43 @@ public enum TrafficDirection
 {
     NorthSouth,
     EastWest,
+}
+
+[Serializable]
+public struct IntersectionState : INetworkSerializable, System.IEquatable<IntersectionState>
+{
+    public LightColor NorthSouthLightColor;
+    public LightColor EastWestLightColor;
+    public bool IsNorthSouthPedestrianLightFlashing;
+    public bool IsEastWestPedestrianLightFlashing;
+
+    public IntersectionState(LightColor northSouthLightColor, LightColor eastWestLightColor, bool isNorthSouthFlashin, bool isEastWestFlashing)
+    {
+        this.NorthSouthLightColor = northSouthLightColor;
+        this.EastWestLightColor = eastWestLightColor;
+        this.IsNorthSouthPedestrianLightFlashing = isNorthSouthFlashin;
+        this.IsEastWestPedestrianLightFlashing = isEastWestFlashing;
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        if (serializer.IsReader)
+        {
+            var reader = serializer.GetFastBufferReader();
+            reader.ReadValueSafe(out NorthSouthLightColor);
+            reader.ReadValueSafe(out EastWestLightColor);
+            reader.ReadValueSafe(out IsNorthSouthPedestrianLightFlashing);
+            reader.ReadValueSafe(out IsEastWestPedestrianLightFlashing);
+        }
+        else
+        {
+            var writer = serializer.GetFastBufferWriter();
+            writer.WriteValueSafe(NorthSouthLightColor);
+            writer.WriteValueSafe(EastWestLightColor);
+            writer.WriteValueSafe(IsNorthSouthPedestrianLightFlashing);
+            writer.WriteValueSafe(IsEastWestPedestrianLightFlashing);
+        }
+    }
+
+    public readonly bool Equals(IntersectionState other) => NorthSouthLightColor == other.NorthSouthLightColor && EastWestLightColor == other.EastWestLightColor && IsNorthSouthPedestrianLightFlashing == other.IsNorthSouthPedestrianLightFlashing && IsEastWestPedestrianLightFlashing == other.IsEastWestPedestrianLightFlashing;
 }
