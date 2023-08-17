@@ -157,7 +157,7 @@ public class VehicleAiPathController : NetworkBehaviour
         if (this._directionSwitchCount == this._directionsWithTurningPoints.Count() - 1)
         {
             // Reached final waypoint
-            Destroy(gameObject);
+            NetworkObject.Despawn();
             this._currentWaypoint = 0;
             this._currentDirectionPath = null;
             this._directionSwitchCount = 0;

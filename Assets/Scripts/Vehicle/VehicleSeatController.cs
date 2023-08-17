@@ -37,11 +37,7 @@ public class VehicleSeatController : NetworkBehaviourWithLogger<VehicleSeatContr
         this._interactionController.OnInteraction -= this.OnInteraction;
         this._playerInDriverSeatClientId.OnValueChanged -= this.OnDriverSeatChange;
         MultiplayerSystem.OnPlayerDisconnect -= this.OnPlayerDisconnect;
-
-        if (this.IsHost)
-        {
-            Destroy(this._driverSeatPosition.gameObject);
-        }
+        Destroy(this._driverSeatPosition.gameObject);
     }
 
     private void OnInteraction(InteractionType interaction)
