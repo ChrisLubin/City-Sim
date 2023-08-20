@@ -13,7 +13,7 @@ public class NPCAiPathController : NetworkBehaviour
 
     private Path _path = null;
     private int _currentWaypoint = 0;
-    [SerializeField] private float _waypointEnteredDistance = 3;
+    [SerializeField] private float _waypointEnteredDistance = 4;
 
     [SerializeField] private Transform _startingDestination;
     private Vector3 _currentDestination = Vector3.zero;
