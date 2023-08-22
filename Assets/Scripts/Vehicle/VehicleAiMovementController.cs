@@ -87,9 +87,9 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
         bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Any(obj => obj.collider.gameObject != gameObject);
-        bool hasPlayerInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Player)).Count() > 0;
+        bool hasCharacterInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Character)).Where(c => !c.collider.isTrigger).Count() > 0;
 
-        if (this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay) || (hasVehicleInFront && !this._isAtIntersection) || (hasPlayerInFront && !this._isAtIntersection))
+        if (this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay) || (hasVehicleInFront && !this._isAtIntersection) || (hasCharacterInFront && !this._isAtIntersection))
         {
             this._movementController.DecelerateCar();
             return;

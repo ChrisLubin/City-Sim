@@ -3,7 +3,7 @@ public static class Constants
     public static class LayerNames
     {
         public const string Interactable = "Interactable";
-        public const string Player = "Player";
+        public const string Character = "Character";
         public const string Vehicle = "Vehicle";
     }
 
@@ -15,5 +15,6 @@ public static class Constants
         public const string SouthDirection = "AiVehicleNavigationSouthDirection";
         public const string WestDirection = "AiVehicleNavigationWestDirection";
         public const string PedestrianPoints = "AiPedestrianNavigation";
+        public const string Player = "Player";
     }
 }

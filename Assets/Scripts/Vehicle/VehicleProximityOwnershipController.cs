@@ -23,7 +23,8 @@ public class VehicleProximityOwnershipController : NetworkBehaviorAutoDisable<Ve
     {
         if (!this.IsHost || this._seatController.HasPlayerInDriverSeat) { return; }
 
-        RaycastHit[] playersThatAreNear = Physics.BoxCastAll(transform.position + Vector3.up, new(this._maxPlayerDistanceCheck, 0.01f, this._maxPlayerDistanceCheck), Vector3.forward, Quaternion.identity, 0.01f, LayerMask.GetMask(Constants.LayerNames.Player));
+        RaycastHit[] charactersThatAreNear = Physics.BoxCastAll(transform.position + Vector3.up, new(this._maxPlayerDistanceCheck, 0.01f, this._maxPlayerDistanceCheck), Vector3.forward, Quaternion.identity, 0.01f, LayerMask.GetMask(Constants.LayerNames.Character));
+        RaycastHit[] playersThatAreNear = charactersThatAreNear.Where(character => character.collider.tag == Constants.TagNames.Player).ToArray();
         if (playersThatAreNear.Length == 0) { return; }
 
         IOrderedEnumerable<RaycastHit> sortedPlayersByDistance = playersThatAreNear.OrderBy(player => Vector3.Distance(transform.position, player.collider.transform.position));

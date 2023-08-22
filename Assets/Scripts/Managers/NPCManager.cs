@@ -2,10 +2,10 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NPCManager : NetworkedStaticInstanceWithLogger<NPCManager>
+public class NpcManager : NetworkedStaticInstanceWithLogger<NpcManager>
 {
-    [SerializeField] Transform _NPCPrefab;
-    [SerializeField] Transform _NPCContainer;
+    [SerializeField] Transform _npcPrefab;
+    [SerializeField] Transform _npcContainer;
     [SerializeField] int _npcSpawnCount = 20;
 
     private const string _PEDESTRIAN_GRAPH_NAME = "Pedestrian Graph";
@@ -33,14 +33,14 @@ public class NPCManager : NetworkedStaticInstanceWithLogger<NPCManager>
         switch (state)
         {
             case GameState.GameStarted:
-                this.SpawnNPCs(this._npcSpawnCount);
+                this.SpawnNpcs(this._npcSpawnCount);
                 break;
             default:
                 break;
         }
     }
 
-    private void SpawnNPCs(int amount)
+    private void SpawnNpcs(int amount)
     {
         if (!this.IsHost) { return; }
 
@@ -49,10 +49,10 @@ public class NPCManager : NetworkedStaticInstanceWithLogger<NPCManager>
             int randomSpawnPointIndex = UnityEngine.Random.Range(0, _ALL_PEDESTRIAN_POINTS.Length);
             Vector3 randomSpawnPoint = _ALL_PEDESTRIAN_POINTS[randomSpawnPointIndex];
 
-            Transform npcTransform = Instantiate(this._NPCPrefab, randomSpawnPoint, Quaternion.identity);
+            Transform npcTransform = Instantiate(this._npcPrefab, randomSpawnPoint, Quaternion.identity);
             NetworkObject npcNetworkObject = npcTransform.GetComponent<NetworkObject>();
             npcNetworkObject.SpawnWithOwnership(0);
-            npcNetworkObject.TrySetParent(this._NPCContainer);
+            npcNetworkObject.TrySetParent(this._npcContainer);
         }
 
         this._logger.Log($"Spawned {amount} NPCs");

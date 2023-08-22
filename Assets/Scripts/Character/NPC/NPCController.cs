@@ -1,7 +1,6 @@
-using Unity.Netcode;
 using UnityEngine;
 
-public class NPCController : NetworkBehaviorAutoDisable<NPCController>
+public class NpcController : NetworkBehaviorAutoDisable<NpcController>
 {
     private SkinnedMeshRenderer[] _skins;
 

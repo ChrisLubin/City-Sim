@@ -97,9 +97,9 @@ public static class Helpers
 
 public enum Direction
 {
+    None,
     North,
     East,
     South,
-    West,
-    None
+    West
 }

@@ -7,7 +7,7 @@ public class CharacterMovementController : NetworkBehaviorAutoDisable<CharacterM
 
     [Header("Inherited Class Control Options")]
     [SerializeField] private Transform _orientation;
-    public bool IsNPC = false;
+    public bool IsNpc = false;
     public bool IsTryingToJump = false;
     public bool IsTryingToSprint = false;
     public bool IsTryingToStayCrouched = false;
@@ -146,7 +146,13 @@ public class CharacterMovementController : NetworkBehaviorAutoDisable<CharacterM
     private void MovePlayer()
     {
         this._previousMoveDirection = this._moveDirection;
-        this._moveDirection = !this.IsNPC ? this._orientation.forward * this.VerticalInput + this._orientation.right * this.HorizontalInput : this._orientation.forward;
+
+        if (!this.IsNpc)
+            this._moveDirection = this._orientation.forward * this.VerticalInput + this._orientation.right * this.HorizontalInput;
+        else if (this.IsTryingToMoveForward)
+            this._moveDirection = this._orientation.forward;
+        else
+            this._moveDirection = Vector3.zero;
 
         if (IsOnSlope() && !this._exitingSlope)
         {
@@ -165,7 +171,7 @@ public class CharacterMovementController : NetworkBehaviorAutoDisable<CharacterM
         }
 
         // Turn gravity off while on slope
-        this._rigidBody.useGravity = !IsOnSlope();
+        // this._rigidBody.useGravity = !IsOnSlope();
 
         bool isMovingForward = this.IsTryingToMoveForward;
 

@@ -5,9 +5,9 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Linq;
 
-[RequireComponent(typeof(NPCMovementController))]
+[RequireComponent(typeof(NpcMovementController))]
 [RequireComponent(typeof(Seeker))]
-public class NPCAiPathController : NetworkBehaviour
+public class NpcAiPathController : NetworkBehaviour
 {
     private Seeker _seeker;
 
@@ -19,6 +19,7 @@ public class NPCAiPathController : NetworkBehaviour
     private Vector3 _currentDestination = Vector3.zero;
 
     public event Action<Vector3> OnNextNodeChange;
+    public event Action<Direction> OnUpcomingDirectionChange;
 
     private const string _PEDESTRIAN_GRAPH_NAME = "Pedestrian Graph";
     private static Vector3[] _ALL_PEDESTRIAN_POINTS;
@@ -57,6 +58,7 @@ public class NPCAiPathController : NetworkBehaviour
     {
         if (!this.IsOwner || this._path == null) { return; }
 
+        this.UpdateUpcomingDirection();
         float distanceToNextWaypoint;
 
         // Check in a loop if we are close enough to the current waypoint to switch to the next one
@@ -88,5 +90,39 @@ public class NPCAiPathController : NetworkBehaviour
         Path path = this._seeker.StartPath(transform.position, this._currentDestination, (Path p) => { }, GraphMask.FromGraphName(_PEDESTRIAN_GRAPH_NAME));
         await path.WaitForPath();
         this._path = path;
+    }
+
+    private void UpdateUpcomingDirection()
+    {
+        float xDirectionChange = 0f;
+        float zDirectionChange = 0f;
+
+        if (this._currentWaypoint >= this._path.vectorPath.Count() - 1)
+        {
+            OnUpcomingDirectionChange?.Invoke(Direction.None);
+            return;
+        }
+
+        int nodesFound = 0;
+        int nodeAmountToFind = 7;
+
+        for (int i = this._currentWaypoint; i < this._path.vectorPath.Count() - 1; i++)
+        {
+            Vector3 currentNode = this._path.vectorPath[i];
+            Vector3 nextNode = this._path.vectorPath[i + 1];
+            float xChange = nextNode.x - currentNode.x;
+            float zChange = nextNode.z - currentNode.z;
+
+            xDirectionChange += xChange;
+            zDirectionChange += zChange;
+            nodesFound++;
+
+            if (nodesFound == nodeAmountToFind) { break; }
+        }
+
+        if (Math.Abs(zDirectionChange) >= Math.Abs(xDirectionChange))
+            OnUpcomingDirectionChange?.Invoke(zDirectionChange <= 0f ? Direction.North : Direction.South);
+        else
+            OnUpcomingDirectionChange?.Invoke(xDirectionChange <= 0f ? Direction.East : Direction.West);
     }
 }

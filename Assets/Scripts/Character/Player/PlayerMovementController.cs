@@ -14,7 +14,7 @@ public class PlayerMovementController : CharacterMovementController
     private void Awake()
     {
         base.OnAwake();
-        this.IsNPC = false;
+        this.IsNpc = false;
         this._collider = GetComponent<Collider>();
         this._interactorController = GetComponent<CharacterInteractorController>();
         this._interactorController.OnDidInteraction += this.OnPlayerDidInteraction;
