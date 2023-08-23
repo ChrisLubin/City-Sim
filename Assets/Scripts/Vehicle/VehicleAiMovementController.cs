@@ -12,8 +12,9 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
     private VehicleAiPathController _pathController;
 
     [SerializeField] private Transform _frontOfVehicle;
-    [SerializeField] private float _maxCollisionLengthDistanceCheck = 7f;
-    [SerializeField] private float _maxCollisionWidthDistanceCheck = 6f;
+    [SerializeField] private float _collisionCheckOffset = 0.5f;
+    [SerializeField] private float _maxCollisionLengthDistanceCheck = 6f;
+    [SerializeField] private float _maxCollisionWidthDistanceCheck = 4f;
     [SerializeField] private float _maxCollisionHeightDistanceCheck = 1f;
     [SerializeField] private float _turnThreshold = 1f;
 
@@ -27,37 +28,43 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
 
     private Direction _upcomingDirection;
     public Direction UpcomingDirection { get => this._upcomingDirection; }
+    Vector3 LocalDirection => transform.TransformDirection(new(0f, 0f, this._maxCollisionLengthDistanceCheck));
 
     void OnDrawGizmosSelected()
     {
         // Draw detection zone
         Gizmos.color = new Color(255, 0, 0);
+        Vector3 p1 = this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset;
+        Vector3 p2 = this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset + LocalDirection;
+        Vector3 extents = new(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f);
+        bool boxes = true;
 
-        // Draw 4 lines going forward
-        Vector3 closeTopLeftCorner = this._frontOfVehicle.position + (this._frontOfVehicle.up * this._maxCollisionHeightDistanceCheck / 2f) + (-this._frontOfVehicle.right * this._maxCollisionWidthDistanceCheck / 2f);
-        Vector3 farTopLeftCorner = closeTopLeftCorner + (this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck);
-        Gizmos.DrawLine(closeTopLeftCorner, farTopLeftCorner);
-        Vector3 closeBottomLeftCorner = closeTopLeftCorner + (-this._frontOfVehicle.up * this._maxCollisionHeightDistanceCheck);
-        Vector3 farBottomLeftCorner = closeBottomLeftCorner + (this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck);
-        Gizmos.DrawLine(closeBottomLeftCorner, farBottomLeftCorner);
-        Vector3 closeTopRightCorner = closeTopLeftCorner + (this._frontOfVehicle.right * this._maxCollisionWidthDistanceCheck);
-        Vector3 farTopRightCorner = closeTopRightCorner + (this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck);
-        Gizmos.DrawLine(closeTopRightCorner, farTopRightCorner);
-        Vector3 closeBottomRightCorner = closeTopRightCorner + (-this._frontOfVehicle.up * this._maxCollisionHeightDistanceCheck);
-        Vector3 farBottomRightCorner = closeBottomRightCorner + (this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck);
-        Gizmos.DrawLine(closeBottomRightCorner, farBottomRightCorner);
+        Vector3 halfExtents = extents / 2;
+        Vector3 halfExtentsZ = transform.forward * halfExtents.z;
+        Vector3 halfExtentsY = transform.up * halfExtents.y;
+        Vector3 halfExtentsX = transform.right * halfExtents.x;
 
-        // Connect corner points
-        Gizmos.DrawLine(closeTopLeftCorner, closeBottomLeftCorner);
-        Gizmos.DrawLine(farTopLeftCorner, farBottomLeftCorner);
-        Gizmos.DrawLine(closeTopRightCorner, closeBottomRightCorner);
-        Gizmos.DrawLine(farTopRightCorner, farBottomRightCorner);
+        if (boxes)
+        {
+            Matrix4x4 matrix = Gizmos.matrix;
+            Gizmos.matrix = Matrix4x4.TRS(p1, transform.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, extents);
+            Gizmos.matrix = Matrix4x4.TRS(p2, transform.rotation, Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, extents);
+            Gizmos.matrix = matrix;
+        }
 
-        // Connect across sides
-        Gizmos.DrawLine(closeTopLeftCorner, closeTopRightCorner);
-        Gizmos.DrawLine(closeBottomLeftCorner, closeBottomRightCorner);
-        Gizmos.DrawLine(farTopLeftCorner, farTopRightCorner);
-        Gizmos.DrawLine(farBottomLeftCorner, farBottomRightCorner);
+        // Draw lines
+        Gizmos.DrawLine(p1 - halfExtentsX - halfExtentsY - halfExtentsZ, p2 - halfExtentsX - halfExtentsY - halfExtentsZ);
+        Gizmos.DrawLine(p1 + halfExtentsX - halfExtentsY - halfExtentsZ, p2 + halfExtentsX - halfExtentsY - halfExtentsZ);
+        Gizmos.DrawLine(p1 - halfExtentsX + halfExtentsY - halfExtentsZ, p2 - halfExtentsX + halfExtentsY - halfExtentsZ);
+        Gizmos.DrawLine(p1 + halfExtentsX + halfExtentsY - halfExtentsZ, p2 + halfExtentsX + halfExtentsY - halfExtentsZ);
+
+        // Draw lines
+        Gizmos.DrawLine(p1 - halfExtentsX - halfExtentsY + halfExtentsZ, p2 - halfExtentsX - halfExtentsY + halfExtentsZ);
+        Gizmos.DrawLine(p1 + halfExtentsX - halfExtentsY + halfExtentsZ, p2 + halfExtentsX - halfExtentsY + halfExtentsZ);
+        Gizmos.DrawLine(p1 - halfExtentsX + halfExtentsY + halfExtentsZ, p2 - halfExtentsX + halfExtentsY + halfExtentsZ);
+        Gizmos.DrawLine(p1 + halfExtentsX + halfExtentsY + halfExtentsZ, p2 + halfExtentsX + halfExtentsY + halfExtentsZ);
     }
 
     private void Awake()
@@ -86,8 +93,8 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
     {
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
-        bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Any(obj => obj.collider.gameObject != gameObject);
-        bool hasCharacterInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._maxCollisionLengthDistanceCheck / 2, new(this._maxCollisionLengthDistanceCheck / 2, this._maxCollisionHeightDistanceCheck, this._maxCollisionWidthDistanceCheck / 2), this._frontOfVehicle.forward, transform.rotation, 0.01f, LayerMask.GetMask(Constants.LayerNames.Character)).Where(c => !c.collider.isTrigger).Count() > 0;
+        bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Length > 0;
+        bool hasCharacterInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Character)).Where(c => !c.collider.isTrigger).Count() > 0;
 
         if (this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay) || (hasVehicleInFront && !this._isAtIntersection) || (hasCharacterInFront && !this._isAtIntersection))
         {

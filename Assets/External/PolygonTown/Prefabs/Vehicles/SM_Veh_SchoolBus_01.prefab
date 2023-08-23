@@ -864,9 +864,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _frontOfVehicle: {fileID: 6295081095825345150}
+  _collisionCheckOffset: 0.5
   _maxCollisionLengthDistanceCheck: 7
   _maxCollisionWidthDistanceCheck: 4
-  _maxCollisionHeightDistanceCheck: 1
+  _maxCollisionHeightDistanceCheck: 1.5
   _turnThreshold: 1
   _maxSpeed: 15
 --- !u!114 &1352428344351915572
