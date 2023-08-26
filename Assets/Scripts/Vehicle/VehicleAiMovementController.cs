@@ -20,7 +20,11 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
     [SerializeField] private float _maxSpeed = 15f;
 
     private float _originalMaxCollisionLengthDistanceCheck;
+    private float _originalMaxCollisionWidthDistanceCheck;
+    private float _originalTurnThreshold;
     [SerializeField] private float _intersectionMaxCollisionLengthDistanceCheck = 1f;
+    [SerializeField] private float _intersectionMaxCollisionWidthDistanceCheck = 4f;
+    [SerializeField] private float _intersectionTurnThreshold = 1f;
 
     private Vector3 _target = Vector3.zero;
     private bool _hasTarget { get => this._target != Vector3.zero; }
@@ -77,6 +81,8 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
         this._pathController.OnNextNodeChange += this.OnTargetChange;
         this._pathController.OnUpcomingDirectionChange += this.OnUpcomingDirectionChange;
         this._originalMaxCollisionLengthDistanceCheck = this._maxCollisionLengthDistanceCheck;
+        this._originalMaxCollisionWidthDistanceCheck = this._maxCollisionWidthDistanceCheck;
+        this._originalTurnThreshold = this._turnThreshold;
     }
 
     public override void OnDestroy()
@@ -97,6 +103,8 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
         this._maxCollisionLengthDistanceCheck = this._isAtIntersection && this._hasRightOfWay ? this._intersectionMaxCollisionLengthDistanceCheck : this._originalMaxCollisionLengthDistanceCheck;
+        this._maxCollisionWidthDistanceCheck = this._isAtIntersection && this._hasRightOfWay ? this._intersectionMaxCollisionWidthDistanceCheck : this._originalMaxCollisionWidthDistanceCheck;
+        this._turnThreshold = this._isAtIntersection && this._hasRightOfWay ? this._intersectionTurnThreshold : this._originalTurnThreshold;
 
         bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Length > 0;
         bool hasCharacterInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Character)).Where(c => !c.collider.isTrigger).Count() > 0;

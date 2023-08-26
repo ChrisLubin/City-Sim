@@ -264,10 +264,6 @@ MonoBehaviour:
   _southEastCheckPoint: {fileID: 4103392691841241685}
   _southWestCheckPoint: {fileID: 922103231350947992}
   _northWestCheckPoint: {fileID: 6419791696325018649}
-  x: 3
-  y: 0.5
-  z: 3.5
-  _target: {fileID: 0}
 --- !u!114 &6675542681232892545
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1911,7 +1907,7 @@ PrefabInstance:
     - target: {fileID: 8488968797585145215, guid: 9952bd355ad1b5e49866a65f006839eb,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 17.36
+      value: 17.55
       objectReference: {fileID: 0}
     - target: {fileID: 8488968797585145215, guid: 9952bd355ad1b5e49866a65f006839eb,
         type: 3}

@@ -553,6 +553,7 @@ Transform:
   - {fileID: 8917642225355120224}
   - {fileID: 8191616327951053815}
   - {fileID: 5697572266486588017}
+  - {fileID: 7417662473677688496}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -784,10 +785,13 @@ MonoBehaviour:
   _frontOfVehicle: {fileID: 5697572266486588017}
   _collisionCheckOffset: 0.5
   _maxCollisionLengthDistanceCheck: 7
-  _maxCollisionWidthDistanceCheck: 4
+  _maxCollisionWidthDistanceCheck: 2
   _maxCollisionHeightDistanceCheck: 2.5
   _turnThreshold: 1
   _maxSpeed: 15
+  _intersectionMaxCollisionLengthDistanceCheck: 0.5
+  _intersectionMaxCollisionWidthDistanceCheck: 1
+  _intersectionTurnThreshold: 0.01
 --- !u!114 &5321990356162742780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -801,6 +805,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _waypointEnteredDistance: 3
+  _internalVehicleCheckpoint: {fileID: 7417662473677688496}
   _target: {fileID: 0}
 --- !u!114 &6983839110802789413
 MonoBehaviour:
@@ -1969,4 +1974,35 @@ Transform:
   - {fileID: 7728867326760585102}
   m_Father: {fileID: 8191616327951053815}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8971623740941277949
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7417662473677688496}
+  m_Layer: 0
+  m_Name: InternalCheckpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7417662473677688496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8971623740941277949}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 1.61}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4539974619004416}
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -282,10 +282,13 @@ MonoBehaviour:
   _frontOfVehicle: {fileID: 6377391290622572326}
   _collisionCheckOffset: 0.7
   _maxCollisionLengthDistanceCheck: 7
-  _maxCollisionWidthDistanceCheck: 4
+  _maxCollisionWidthDistanceCheck: 1.8
   _maxCollisionHeightDistanceCheck: 1.5
   _turnThreshold: 1
   _maxSpeed: 15
+  _intersectionMaxCollisionLengthDistanceCheck: 1
+  _intersectionMaxCollisionWidthDistanceCheck: 4
+  _intersectionTurnThreshold: 1
 --- !u!114 &5918858890157470523
 MonoBehaviour:
   m_ObjectHideFlags: 0
