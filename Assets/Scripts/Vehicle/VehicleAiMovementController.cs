@@ -17,8 +17,10 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
     [SerializeField] private float _maxCollisionWidthDistanceCheck = 4f;
     [SerializeField] private float _maxCollisionHeightDistanceCheck = 1f;
     [SerializeField] private float _turnThreshold = 1f;
-
     [SerializeField] private float _maxSpeed = 15f;
+
+    private float _originalMaxCollisionLengthDistanceCheck;
+    [SerializeField] private float _intersectionMaxCollisionLengthDistanceCheck = 1f;
 
     private Vector3 _target = Vector3.zero;
     private bool _hasTarget { get => this._target != Vector3.zero; }
@@ -74,6 +76,7 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
         this._pathController = GetComponent<VehicleAiPathController>();
         this._pathController.OnNextNodeChange += this.OnTargetChange;
         this._pathController.OnUpcomingDirectionChange += this.OnUpcomingDirectionChange;
+        this._originalMaxCollisionLengthDistanceCheck = this._maxCollisionLengthDistanceCheck;
     }
 
     public override void OnDestroy()
@@ -93,10 +96,12 @@ public class VehicleAiMovementController : NetworkBehaviour, IAiMovementControll
     {
         if (!this.IsOwner || !this._seatController.HasAiInDriverSeat || !this._hasTarget) { return; }
 
+        this._maxCollisionLengthDistanceCheck = this._isAtIntersection && this._hasRightOfWay ? this._intersectionMaxCollisionLengthDistanceCheck : this._originalMaxCollisionLengthDistanceCheck;
+
         bool hasVehicleInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Vehicle)).Length > 0;
         bool hasCharacterInFront = Physics.BoxCastAll(this._frontOfVehicle.position + this._frontOfVehicle.forward * this._collisionCheckOffset, new Vector3(this._maxCollisionWidthDistanceCheck, this._maxCollisionHeightDistanceCheck, 1f) / 2, LocalDirection, transform.rotation, LocalDirection.magnitude, LayerMask.GetMask(Constants.LayerNames.Character)).Where(c => !c.collider.isTrigger).Count() > 0;
 
-        if (this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay) || (hasVehicleInFront && !this._isAtIntersection) || (hasCharacterInFront && !this._isAtIntersection))
+        if (hasVehicleInFront || hasCharacterInFront || this._isAtRedLightOrStopSign || (this._isAtIntersection && !this._hasRightOfWay))
         {
             this._movementController.DecelerateCar();
             return;
