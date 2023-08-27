@@ -143,7 +143,7 @@ public class MultiplayerSystem : NetworkedStaticInstanceWithLogger<MultiplayerSy
                 try
                 {
                     // Create allocation
-                    Allocation createAllocation = await RelayService.Instance.CreateAllocationAsync(_MAX_PLAYER_COUNT);
+                    Allocation createAllocation = await RelayService.Instance.CreateAllocationAsync(_MAX_PLAYER_COUNT, Debug.isDebugBuild ? "us-east4" : null);
                     string relayCode = await RelayService.Instance.GetJoinCodeAsync(createAllocation.AllocationId);
                     relayServerData = new(createAllocation, "dtls");
                     NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
