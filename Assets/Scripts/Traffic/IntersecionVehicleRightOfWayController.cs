@@ -96,7 +96,7 @@ public class IntersecionVehicleRightOfWayController : MonoBehaviour
 
     private void OnVehicleInEnterCheckpointUpdate(bool isNorthSouthTraffic, VehicleAiMovementController movementController)
     {
-        if (movementController == null) { return; }
+        if (movementController == null || !movementController.IsOwner) { return; }
 
         bool doesVehicleHaveGreenLight = isNorthSouthTraffic ? this._doesNorthSouthHaveGreenLight : this._doesEastWestHaveGreenLight;
 
@@ -144,6 +144,8 @@ public class IntersecionVehicleRightOfWayController : MonoBehaviour
 
     private void OnDetectedVehicleEnteringOnGreenLight(VehicleAiMovementController movementController, Direction directionComingIn)
     {
+        if (!movementController.IsOwner) { return; }
+
         movementController.SetIsAtRedLightOrStopSign(false);
         bool isTurningLeft = directionComingIn.IsNextDirectionLeftTurn(movementController.UpcomingDirection);
         bool isGoingStraight = directionComingIn == movementController.UpcomingDirection;
@@ -183,7 +185,7 @@ public class IntersecionVehicleRightOfWayController : MonoBehaviour
 
     private void OnVehicleExitingIntersectionUpdate(VehicleAiMovementController movementController)
     {
-        if (movementController == null) { return; }
+        if (movementController == null || !movementController.IsOwner) { return; }
 
         movementController.SetIsAtIntersection(false);
         movementController.SetHasRightOfWay(false);
@@ -192,6 +194,8 @@ public class IntersecionVehicleRightOfWayController : MonoBehaviour
 
     private void OnCarHavingRightOfWay(VehicleAiMovementController movementController, Direction directionComingIn)
     {
+        if (!movementController.IsOwner) { return; }
+
         movementController.SetHasRightOfWay(true);
         this._aiCarsDataInsideIntersection.Add(new(movementController, directionComingIn, movementController.UpcomingDirection));
     }

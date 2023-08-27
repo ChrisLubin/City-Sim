@@ -21,7 +21,7 @@ public class VehicleProximityOwnershipController : NetworkBehaviorAutoDisable<Ve
 
     private void Update()
     {
-        if (!this.IsHost || this._seatController.HasPlayerInDriverSeat) { return; }
+        if (!this.IsHost || this._seatController.HasPlayerInDriverSeat || this._seatController.HasAiInDriverSeat) { return; }
 
         RaycastHit[] charactersThatAreNear = Physics.BoxCastAll(transform.position + Vector3.up, new(this._maxPlayerDistanceCheck, 0.01f, this._maxPlayerDistanceCheck), Vector3.forward, Quaternion.identity, 0.01f, LayerMask.GetMask(Constants.LayerNames.Character));
         RaycastHit[] playersThatAreNear = charactersThatAreNear.Where(character => character.collider.tag == Constants.TagNames.Player).ToArray();
